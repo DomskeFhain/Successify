@@ -6,6 +6,8 @@ const db = new sqlite3.Database("./database/successify.db");
 const bcrypt = require("bcrypt");
 const saltRounds = 10;
 const cors = require("cors");
+const jwt = require('jsonwebtoken');
+require('dotenv').config();
 
 // Hilfsfunktionen
 
@@ -79,6 +81,30 @@ app.post("/users", (req, res) => {
 });
 
 // Login
+
+app.post("/login", (req, res) => {
+  const { username, password } = req.body;
+
+  db.get("SELECT * FROM users WHERE username = ?", [username], async (err, rows) => {
+    if (err) {
+      return res.status(500).send("Fehler in deiner Query Anfrage");
+    } else if (rows.length === 0) {
+      return res.status(400).send("Benutzer nicht gefunden");
+    } else {
+      const match = await verifyPassword(password, rows.password);
+      if (!match) {
+        return res.status(400).send("Passwortd ist falsch");
+
+      }
+      const token = jwt.sign({ id: rows.id, username: rows.username }, process.env.JWT_SECRET, { expiresIn: '1h' });
+      return res.status(200).json({
+        message: 'Login erfolgreich',
+        token: token,
+      })
+    }
+  })
+
+})
 
 app.listen(port, () => {
   console.log(`Server läuft auf Port ${port}`);
