@@ -107,11 +107,15 @@ app.post("/login", (req, res) => {
       if (err) {
         return res.status(500).send("Fehler in deiner Query Anfrage");
       } else if (!rows) {
-        return res.status(400).send("Benutzer nicht gefunden");
+        return res.status(400).send("User not found!");
       } else {
         const match = await verifyPassword(password, rows.password);
         if (!match) {
-          return res.status(400).send("Passwortd ist falsch");
+          return res
+            .status(400)
+            .send(
+              "Error during login attempt, please check your entries and try again!"
+            );
         }
         const token = jwt.sign(
           { id: rows.id, username: rows.username },

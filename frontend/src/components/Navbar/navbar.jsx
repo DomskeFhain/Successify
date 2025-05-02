@@ -13,11 +13,13 @@ import Tooltip from '@mui/material/Tooltip';
 import MenuItem from '@mui/material/MenuItem';
 import AdbIcon from '@mui/icons-material/Adb';
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../AuthContex/AuthContex';
 
 const pages = ['Mete', 'Pricing', 'Blog'];
-const settings = ['Profile', 'Logout'];
+
 
 function Navbar() {
+  const { token, logout } = useAuth();
   const [anchorElNav, setAnchorElNav] = React.useState(null);
   const [anchorElUser, setAnchorElUser] = React.useState(null);
   const navigate = useNavigate();
@@ -97,12 +99,11 @@ function Navbar() {
               ))}
             </Menu>
           </Box>
-          <AdbIcon sx={{ display: { xs: 'flex', md: 'none' }, mr: 1 }} />
-          <Typography
+          <AdbIcon onClick={() => {navigate("/")}} sx={{ display: { xs: 'flex', md: 'none' }, mr: 1 , cursor: "pointer"}} />
+          <Typography onClick={() => {navigate("/")}}
             variant="h5"
             noWrap
             component="a"
-            href="#app-bar-with-responsive-menu"
             sx={{
               mr: 2,
               display: { xs: 'flex', md: 'none' },
@@ -112,9 +113,10 @@ function Navbar() {
               letterSpacing: '.3rem',
               color: 'inherit',
               textDecoration: 'none',
+              cursor: "pointer"
             }}
           >
-            LOGO
+            SUCCESSIFY
           </Typography>
           <Box sx={{ flexGrow: 1, display: { xs: 'none', md: 'flex' } }}>
             {pages.map((page) => (
@@ -127,8 +129,8 @@ function Navbar() {
               </Button>
             ))}
           </Box>
-          <Box sx={{ flexGrow: 0 }}>
-            <Tooltip title="Open settings">
+          <Box sx={{ flexGrow: 0, display: 'flex', gap: 1, alignItems: 'center' }}>
+            {token ? (<><Tooltip title="Open settings">
               <IconButton onClick={handleOpenUserMenu} sx={{ p: 0 }}>
                 <Avatar alt="Remy Sharp" src="/static/images/avatar/2.jpg" />
               </IconButton>
@@ -149,12 +151,25 @@ function Navbar() {
               open={Boolean(anchorElUser)}
               onClose={handleCloseUserMenu}
             >
-              {settings.map((setting) => (
-                <MenuItem key={setting} onClick={handleCloseUserMenu}>
-                  <Typography sx={{ textAlign: 'center' }}>{setting}</Typography>
+              
+                <MenuItem key="Profile" onClick={handleCloseUserMenu}>
+                  <Typography sx={{ textAlign: 'center' }}>Profile</Typography>
                 </MenuItem>
-              ))}
-            </Menu>
+                <MenuItem key="Logout" onClick={() => { handleCloseUserMenu(); logout(); navigate('/'); }}>
+                <Typography sx={{ textAlign: 'center' }}>Logout</Typography>
+              </MenuItem>
+              
+            </Menu></>) : (
+            <>
+              <Button onClick={() => navigate("/register")} sx={{ color: 'white', display: { xs: 'flex', md: 'flex' } }}>
+                Register
+              </Button>
+              <Button onClick={() => navigate("/login")} sx={{ color: 'white', display: { xs: 'flex', md: 'flex' } }}>
+                Login
+              </Button>
+            </>
+  )}
+            
           </Box>
         </Toolbar>
       </Container>
