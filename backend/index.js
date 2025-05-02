@@ -25,6 +25,22 @@ async function verifyPassword(inputPassword, storedHash) {
   return match;
 }
 
+// JWT Middlewear zur überprüfung des JWT Tokens
+
+function auth(req, res, next) {
+  const authHeader = req.headers["authorization"];
+  const token = authHeader?.split(" ")[1];
+
+  if (!token) return res.status(401).json({ message: "Kein Token vorhanden" });
+
+  jwt.verify(token, process.env.JWT_SECRET, (err, user) => {
+    if (err) return res.status(403).json({ message: "Token ungültig" });
+
+    req.user = user;
+    next();
+  });
+}
+
 // Datenbank
 
 db.serialize(() => {
@@ -93,7 +109,6 @@ app.post("/login", (req, res) => {
       } else if (!rows) {
         return res.status(400).send("Benutzer nicht gefunden");
       } else {
-        console.log(rows);
         const match = await verifyPassword(password, rows.password);
         if (!match) {
           return res.status(400).send("Passwortd ist falsch");
@@ -110,6 +125,15 @@ app.post("/login", (req, res) => {
       }
     }
   );
+});
+
+// Testroute mit der Token Überprüfung
+
+app.get("/protected", auth, (req, res) => {
+  console.log(req.user);
+  const { id, username } = req.user;
+  console.log(id);
+  res.send("Du bist eingeloggt!");
 });
 
 app.listen(port, () => {
