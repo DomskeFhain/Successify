@@ -132,6 +132,36 @@ app.post("/login", (req, res) => {
   );
 });
 
+// Calendar API Routes
+// Calender Get
+
+// Route: http://localhost:9000/calendar?month=05&year=2025
+app.get("/calendar", auth, (req, res) => {
+  const { month, year } = req.query;
+  const { id } = req.user;
+
+
+  db.all(
+    "SELECT * FROM calendar_list WHERE user_id = ? AND cal_date BETWEEN ? AND ?",
+    [id, `${year}-${month}-01`, `${year}-${month}-31`], // Here i make a date range for the month so i become come the full month 
+    (err, rows) => {
+      if (err) {
+        res.status(500).send("Error in the query request. Please check the error in the console.");
+        console.log(err);
+      } else if (!rows.length) {
+        res.status(404).send("No data found for this user with the id " + id);
+      } else {
+        res.status(200).json(rows);
+      }
+    }
+  );
+  
+});
+
+
+
+// Calendar API Routes End
+
 // Testroute mit der Token Überprüfung
 
 app.get("/protected", auth, (req, res) => {
