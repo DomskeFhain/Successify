@@ -141,6 +141,31 @@ app.get("/protected", auth, (req, res) => {
   res.send("Du bist eingeloggt!");
 });
 
+// Finances
+
+app.post("/monthlyFinances", auth, (req, res) => {
+  try {
+    const { id, username } = req.user;
+    const { startDate, endDate } = req.body;
+
+    db.all(
+      "SELECT id, category, costs, date FROM finances WHERE user_id = ? AND date between ? AND ?",
+      [id, startDate, endDate],
+      (err, rows) => {
+        if (!rows) {
+          return res.status(400).send("No Data Found");
+        }
+        res.status(200).json(rows);
+      }
+    );
+  } catch (error) {
+    console.error(error);
+    res
+      .status(500)
+      .json({ error: "Internal Server Error, Please try again later!" });
+  }
+});
+
 app.listen(port, () => {
   console.log(`Server läuft auf Port ${port}`);
 });
