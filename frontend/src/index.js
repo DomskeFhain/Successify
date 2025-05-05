@@ -6,6 +6,7 @@ import Home from "./pages/home/home";
 import Navbar from "./components/Navbar/navbar";
 import Register from "./pages/register/register";
 import Login from "./pages/login/Login";
+import ShoppingList from "./components/Shoppinglist/shoppinglist";
 import { AuthProvider } from "./components/AuthContex/AuthContex";
 
 const root = ReactDOM.createRoot(document.getElementById("root"));
@@ -18,6 +19,7 @@ root.render(
           <Route path="/" element={<Home />} />
           <Route path="/register" element={<Register />} />
           <Route path="/login" element={<Login />} />
+          <Route path="/shoppinglist" element={<ShoppingList />} />
         </Routes>
       </Router>
     </AuthProvider>
