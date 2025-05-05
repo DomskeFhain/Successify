@@ -166,6 +166,40 @@ app.post("/monthlyFinances", auth, (req, res) => {
   }
 });
 
+app.post("/finances", auth, (req, res) => {
+  try {
+    const { id } = req.user;
+    const { category, costs, date } = req.body;
+
+    if (!category || !costs || !date) {
+      return res.status(400).json({ error: "Missing required fields" });
+    }
+
+    db.run(
+      `INSERT INTO finances (user_id, category, costs, date)
+       VALUES (?, ?, ?, ?)`,
+      [id, category, costs, date],
+      function (err) {
+        if (err) {
+          console.error(err);
+          return res
+            .status(500)
+            .json({ error: "Database Error, please try again later!" });
+        }
+
+        res.status(201).json({
+          message: "Finance entry created successfully",
+        });
+      }
+    );
+  } catch (error) {
+    console.error(error);
+    res
+      .status(500)
+      .json({ error: "Internal Server Error, Please try again later!" });
+  }
+});
+
 app.listen(port, () => {
   console.log(`Server läuft auf Port ${port}`);
 });
