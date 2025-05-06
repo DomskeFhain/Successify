@@ -141,6 +141,9 @@ app.get("/protected", auth, (req, res) => {
   res.send("Du bist eingeloggt!");
 });
 
+
 app.listen(port, () => {
   console.log(`Server läuft auf Port ${port}`);
 });
+
+
