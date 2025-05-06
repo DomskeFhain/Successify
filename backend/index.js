@@ -253,6 +253,7 @@ app.put("/finances", auth, (req, res) => {
   }
 });
 
+
 // Calendar API Routes
 // Calender Get
 
@@ -279,10 +280,27 @@ app.get("/calendar", auth, (req, res) => {
   
 });
 
+// Calendar Post 
 
+app.post("/calendar", auth, (req, res) => {
+  const { cal_date, cal_time ,cal_title, cal_description } = req.body;
+  const { id } = req.user;
+
+  db.run(
+    "INSERT INTO calendar_list (cal_title, cal_date, cal_time, user_id, cal_description) VALUES (?, ?, ?, ?, ?)",
+    [cal_title, cal_date, cal_time, id, cal_description],
+    (err) => {
+      if (err) {
+        res.status(500).send("Error in the query request. Please check the error in the console.");
+        console.log(err);
+      } else {
+        res.status(201).send("Calendar entry created successfully!");
+      }
+    }
+  );
+})
 
 // Calendar API Routes End
-
 
 app.listen(port, () => {
   console.log(`Server läuft auf Port ${port}`);
