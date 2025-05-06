@@ -331,7 +331,6 @@ app.post("/shoppinglist", auth, (req, res) => {
   try {
     const { id } = req.user;
     const { item, quantity, price, date } = req.body;
-
     db.run(
       "INSERT INTO shoppinglist (user_id, item, quantity, price, date) VALUES (?, ?, ?, ?, ?)",
       [id, item, quantity, price, date],
