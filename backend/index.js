@@ -131,6 +131,129 @@ app.post("/login", (req, res) => {
     }
   );
 });
+
+// Testroute mit der Token Überprüfung
+
+app.get("/protected", auth, (req, res) => {
+  console.log(req.user);
+  const { id, username } = req.user;
+  console.log(id);
+  res.send("Du bist eingeloggt!");
+});
+
+// Finances
+
+app.get("/monthlyFinances", auth, (req, res) => {
+  try {
+    const { id, username } = req.user;
+    const { startDate, endDate } = req.query;
+    console.log(req.query);
+
+    db.all(
+      "SELECT id, category, costs, date FROM finances WHERE user_id = ? AND date between ? AND ?",
+      [id, startDate, endDate],
+      (err, rows) => {
+        if (rows.length === 0) {
+          return res.status(400).send("No Data Found");
+        }
+        res.status(200).json(rows);
+      }
+    );
+  } catch (error) {
+    console.error(error);
+    res
+      .status(500)
+      .json({ error: "Internal Server Error, Please try again later!" });
+  }
+});
+
+app.post("/finances", auth, (req, res) => {
+  try {
+    const { id } = req.user;
+    const { category, costs, date } = req.body;
+
+    if (!category || !costs || !date) {
+      return res.status(400).json({ error: "Missing required fields" });
+    }
+
+    db.run(
+      `INSERT INTO finances (user_id, category, costs, date)
+       VALUES (?, ?, ?, ?)`,
+      [id, category, costs, date],
+      function (err) {
+        if (err) {
+          console.error(err);
+          return res
+            .status(500)
+            .json({ error: "Database Error, please try again later!" });
+        }
+
+        res.status(201).json({
+          message: "Finance entry created successfully",
+        });
+      }
+    );
+  } catch (error) {
+    console.error(error);
+    res
+      .status(500)
+      .json({ error: "Internal Server Error, Please try again later!" });
+  }
+});
+
+
+app.put("/finances", auth, (req, res) => {
+  try {
+    const { id } = req.user;
+    const { financeId, newCategory, newCosts, newDate } = req.body;
+
+    let changes = [];
+    let values = [];
+
+    if (newCategory) {
+      changes.push("category = ?");
+      values.push(newCategory);
+    }
+
+    if (newCosts) {
+      changes.push("costs = ?");
+      values.push(newCosts);
+    }
+
+    if (newDate) {
+      changes.push("date = ?");
+      values.push(newDate);
+    }
+
+    if (changes.length === 0) {
+      return res.status(400).json({ message: "No update fields provided." });
+    }
+
+    values.push(financeId);
+
+    const query = `UPDATE finances
+                  SET ${changes.join(", ")}
+                  WHERE id = ?`;
+
+    db.run(query, values, function (err) {
+      if (err) {
+        console.error(err);
+        return res.status(500).json({ message: "Update failed" });
+      }
+
+      res.status(200).json({
+        message: "Update was Successful",
+      });
+    });
+  } catch (error) {
+    console.error(error);
+    res
+      .status(500)
+      .json({ error: "Internal Server Error, Please try again later!" });
+  }
+});
+
+
 // Calendar API Routes
 // Calender Get
 
@@ -178,15 +301,6 @@ app.post("/calendar", auth, (req, res) => {
 })
 
 // Calendar API Routes End
-
-// Testroute mit der Token Überprüfung
-
-app.get("/protected", auth, (req, res) => {
-  console.log(req.user);
-  const { id, username } = req.user;
-  console.log(id);
-  res.send("Du bist eingeloggt!");
-});
 
 app.listen(port, () => {
   console.log(`Server läuft auf Port ${port}`);
