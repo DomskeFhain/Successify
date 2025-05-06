@@ -12,6 +12,7 @@ require("dotenv").config();
 
 // Passwort Hashen
 
+
 async function hashPassword(password) {
   const saltRounds = 10;
   const hashedPassword = await bcrypt.hash(password, saltRounds);
@@ -201,7 +202,6 @@ app.post("/finances", auth, (req, res) => {
   }
 });
 
-
 app.put("/finances", auth, (req, res) => {
   try {
     const { id } = req.user;
@@ -245,13 +245,14 @@ app.put("/finances", auth, (req, res) => {
         message: "Update was Successful",
       });
     });
+
   } catch (error) {
     console.error(error);
     res
       .status(500)
-      .json({ error: "Internal Server Error, Please try again later!" });
+      .json({ error: "Internal Server Error, please try again later!" });
   }
-});
+})
 
 
 // Calendar API Routes
@@ -301,6 +302,30 @@ app.post("/calendar", auth, (req, res) => {
 })
 
 // Calendar API Routes End
+
+// Shopping-List
+
+app.get("/shoppinglist", auth, (req, res) => {
+  try {
+    const { id } = req.user;
+    console.log(id);
+    db.all(
+      "SELECT * FROM shoppinglist WHERE user_id = ?",
+      [id],
+      (err, rows) => {
+        if (!rows) {
+          return res.status(400).send("no data found");
+        }
+        res.status(200).json(rows);
+      }
+    );
+  } catch (error) {
+    console.error(error);
+    res
+      .status(500)
+      .json({ error: "Internal Server Error, please try again later!" });
+  }
+})
 
 app.listen(port, () => {
   console.log(`Server läuft auf Port ${port}`);
