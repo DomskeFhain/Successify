@@ -12,7 +12,6 @@ require("dotenv").config();
 
 // Passwort Hashen
 
-
 async function hashPassword(password) {
   const saltRounds = 10;
   const hashedPassword = await bcrypt.hash(password, saltRounds);
@@ -148,7 +147,6 @@ app.get("/monthlyFinances", auth, (req, res) => {
   try {
     const { id, username } = req.user;
     const { startDate, endDate } = req.query;
-    console.log(req.query);
 
     db.all(
       "SELECT id, category, costs, date FROM finances WHERE user_id = ? AND date between ? AND ?",
@@ -245,15 +243,54 @@ app.put("/finances", auth, (req, res) => {
         message: "Update was Successful",
       });
     });
-
   } catch (error) {
     console.error(error);
     res
       .status(500)
       .json({ error: "Internal Server Error, please try again later!" });
   }
-})
+});
 
+app.delete("/finances/:financeId", auth, (req, res) => {
+  try {
+    const { id } = req.user;
+    const { financeId } = req.params;
+
+    db.get(
+      "SELECT * FROM finances WHERE id = ? AND user_id = ?",
+      [parseInt(financeId), id],
+      (err, row) => {
+        if (err) {
+          console.error(err);
+          return res.status(500).json({ message: "Delete failed" });
+        }
+        if (!row) {
+          return res.status(404).json({ message: "No Data found!" });
+        }
+
+        db.run(
+          "DELETE FROM finances WHERE id = ? AND user_id = ?",
+          [parseInt(financeId), id],
+          (err) => {
+            if (err) {
+              console.error(err);
+              return res.status(500).json({ message: "Delete failed" });
+            }
+
+            res.status(200).json({
+              message: "Delete was Successful",
+            });
+          }
+        );
+      }
+    );
+  } catch (error) {
+    console.error(error);
+    res
+      .status(500)
+      .json({ error: "Internal Server Error, Please try again later!" });
+  }
+});
 
 // Calendar API Routes
 // Calender Get
@@ -263,13 +300,16 @@ app.get("/calendar", auth, (req, res) => {
   const { month, year } = req.query;
   const { id } = req.user;
 
-
   db.all(
     "SELECT * FROM calendar_list WHERE user_id = ? AND cal_date BETWEEN ? AND ?",
-    [id, `${year}-${month}-01`, `${year}-${month}-31`], // Here i make a date range for the month so i become come the full month 
+    [id, `${year}-${month}-01`, `${year}-${month}-31`], // Here i make a date range for the month so i become come the full month
     (err, rows) => {
       if (err) {
-        res.status(500).send("Error in the query request. Please check the error in the console.");
+        res
+          .status(500)
+          .send(
+            "Error in the query request. Please check the error in the console."
+          );
         console.log(err);
       } else if (!rows.length) {
         res.status(404).send("No data found for this user with the id " + id);
@@ -278,13 +318,12 @@ app.get("/calendar", auth, (req, res) => {
       }
     }
   );
-  
 });
 
-// Calendar Post 
+// Calendar Post
 
 app.post("/calendar", auth, (req, res) => {
-  const { cal_date, cal_time ,cal_title, cal_description } = req.body;
+  const { cal_date, cal_time, cal_title, cal_description } = req.body;
   const { id } = req.user;
 
   db.run(
@@ -292,14 +331,18 @@ app.post("/calendar", auth, (req, res) => {
     [cal_title, cal_date, cal_time, id, cal_description],
     (err) => {
       if (err) {
-        res.status(500).send("Error in the query request. Please check the error in the console.");
+        res
+          .status(500)
+          .send(
+            "Error in the query request. Please check the error in the console."
+          );
         console.log(err);
       } else {
         res.status(201).send("Calendar entry created successfully!");
       }
     }
   );
-})
+});
 
 // Calendar API Routes End
 
@@ -325,7 +368,110 @@ app.get("/shoppinglist", auth, (req, res) => {
       .status(500)
       .json({ error: "Internal Server Error, please try again later!" });
   }
+});
+
+// To-Do
+
+//LIST ROUTE
+
+app.get("/todolist", auth, (req, res) => {
+  db.all("SELECT * FROM todoList WHERE userID = ?", [req.user.id], (err, rows) => {
+      if (err) {
+          return res.status(500).send("Error in Query Request");
+      } else {
+          return res.status(200).json(rows);
+      }
+  });
+});
+
+app.post("/todolist", auth, (req, res) => {
+  db.run("INSERT INTO todoList (listName, userId) VALUES (?, ?)", [req.body.listName, req.user.id], (err) => {
+      
+  
+  
+  if (err) {
+      return res.status(500).send("ERROR!");
+  } else {
+      return res.status(200).json([{message: "List created successfully",}]);
+  }
+})});
+
+app.put("/todolist/:listId", auth, (req, res) => {
+  const id = req.params.listId;
+  const listName = req.body.listName;
+  db.run("UPDATE todoList SET listName = ? WHERE listId = ?", [listName, id], (err) => {
+      if (err) {
+          return res.status(500).send("ERROR!");
+      } else {
+          return res.status(200).json([{message: "List updated successfully",}]);
+      }
+  })
 })
+
+app.delete("/todolist/:listId", auth, (req, res) => {
+  const id = req.params.listId;
+  db.run("DELETE FROM todoList WHERE listId = ?", [id], (err) => {
+      if (err) {
+          return res.status(500).send("ERROR!");
+      } else {
+          return res.status(200).json([{message: "List deleted successfully",}]);
+      }
+  })
+})
+
+// TASK ROUTE
+
+app.get("/tasks/:listId", auth, (req, res) => {
+  const id = req.params.listId;
+  db.all("SELECT * FROM tasksList WHERE listID = ?", [id], (err, rows) => {
+      if (err) {
+          return res.status(500).send("Error in Query Request");
+      } else {
+          return res.status(200).json(rows);
+      }
+  });
+});
+
+app.post("/tasks/:listId", auth, (req, res) => {
+  const id = req.params.listId;
+  const taskName = req.body.taskName;
+  db.run("INSERT INTO tasksList (taskName, listID) VALUES (?, ?)", [taskName, id
+  ], (err) => {
+      
+  
+  if (err) {
+      return res.status(500).send("ERROR!");
+  } else {
+      return res.status(200).json([{message: "Task created successfully",}]);
+  }}
+)});
+
+app.put("/tasks/:taskId", auth, (req, res) => {
+  const id = req.params.taskId;
+  const taskName = req.body.taskName;
+  db.run("UPDATE tasksList SET taskName = ? WHERE listId = ?", [taskName, id], (err) => {
+      if (err) {
+          return res.status(500).send("ERROR!");
+      } else {
+          return res.status(200).json([{message: "Task updated successfully",}]);
+      }
+  });
+})
+
+app.delete("/tasks/:taskId", auth, (req, res) => {
+  const id = req.params.taskId;
+  console.log(id);
+  db.run("DELETE FROM tasksList WHERE taskId = ?", [id], (err) => {
+      if (err) {
+          return res.status(500).send("ERROR!");
+      } else {
+          return res.status(200).json([{message: "Task deleted successfully",}]);
+      }
+      
+  });
+})
+
+// To-Do End
 
 app.listen(port, () => {
   console.log(`Server läuft auf Port ${port}`);
