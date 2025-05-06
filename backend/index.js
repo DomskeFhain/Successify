@@ -144,16 +144,17 @@ app.get("/protected", auth, (req, res) => {
 
 // Finances
 
-app.post("/monthlyFinances", auth, (req, res) => {
+app.get("/monthlyFinances", auth, (req, res) => {
   try {
     const { id, username } = req.user;
-    const { startDate, endDate } = req.body;
+    const { startDate, endDate } = req.query;
+    console.log(req.query);
 
     db.all(
       "SELECT id, category, costs, date FROM finances WHERE user_id = ? AND date between ? AND ?",
       [id, startDate, endDate],
       (err, rows) => {
-        if (!rows) {
+        if (rows.length === 0) {
           return res.status(400).send("No Data Found");
         }
         res.status(200).json(rows);
@@ -200,6 +201,107 @@ app.post("/finances", auth, (req, res) => {
       .json({ error: "Internal Server Error, Please try again later!" });
   }
 });
+
+app.put("/finances", auth, (req, res) => {
+  try {
+    const { id } = req.user;
+    const { financeId, newCategory, newCosts, newDate } = req.body;
+
+    let changes = [];
+    let values = [];
+
+    if (newCategory) {
+      changes.push("category = ?");
+      values.push(newCategory);
+    }
+
+    if (newCosts) {
+      changes.push("costs = ?");
+      values.push(newCosts);
+    }
+
+    if (newDate) {
+      changes.push("date = ?");
+      values.push(newDate);
+    }
+
+    if (changes.length === 0) {
+      return res.status(400).json({ message: "No update fields provided." });
+    }
+
+    values.push(financeId);
+
+    const query = `UPDATE finances
+                  SET ${changes.join(", ")}
+                  WHERE id = ?`;
+
+    db.run(query, values, function (err) {
+      if (err) {
+        console.error(err);
+        return res.status(500).json({ message: "Update failed" });
+      }
+
+      res.status(200).json({
+        message: "Update was Successful",
+      });
+    });
+
+  } catch (error) {
+    console.error(error);
+    res
+      .status(500)
+      .json({ error: "Internal Server Error, please try again later!" });
+  }
+})
+
+
+// Calendar API Routes
+// Calender Get
+
+// Route: http://localhost:9000/calendar?month=05&year=2025
+app.get("/calendar", auth, (req, res) => {
+  const { month, year } = req.query;
+  const { id } = req.user;
+
+
+  db.all(
+    "SELECT * FROM calendar_list WHERE user_id = ? AND cal_date BETWEEN ? AND ?",
+    [id, `${year}-${month}-01`, `${year}-${month}-31`], // Here i make a date range for the month so i become come the full month 
+    (err, rows) => {
+      if (err) {
+        res.status(500).send("Error in the query request. Please check the error in the console.");
+        console.log(err);
+      } else if (!rows.length) {
+        res.status(404).send("No data found for this user with the id " + id);
+      } else {
+        res.status(200).json(rows);
+      }
+    }
+  );
+  
+});
+
+// Calendar Post 
+
+app.post("/calendar", auth, (req, res) => {
+  const { cal_date, cal_time ,cal_title, cal_description } = req.body;
+  const { id } = req.user;
+
+  db.run(
+    "INSERT INTO calendar_list (cal_title, cal_date, cal_time, user_id, cal_description) VALUES (?, ?, ?, ?, ?)",
+    [cal_title, cal_date, cal_time, id, cal_description],
+    (err) => {
+      if (err) {
+        res.status(500).send("Error in the query request. Please check the error in the console.");
+        console.log(err);
+      } else {
+        res.status(201).send("Calendar entry created successfully!");
+      }
+    }
+  );
+})
+
+// Calendar API Routes End
 
 // Shopping-List
 
