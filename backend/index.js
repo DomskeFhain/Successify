@@ -131,75 +131,6 @@ app.post("/login", (req, res) => {
     }
   );
 });
-
-// Testroute mit der Token Überprüfung
-
-app.get("/protected", auth, (req, res) => {
-  console.log(req.user);
-  const { id, username } = req.user;
-  console.log(id);
-  res.send("Du bist eingeloggt!");
-});
-
-// Finances
-
-app.post("/monthlyFinances", auth, (req, res) => {
-  try {
-    const { id, username } = req.user;
-    const { startDate, endDate } = req.body;
-
-    db.all(
-      "SELECT id, category, costs, date FROM finances WHERE user_id = ? AND date between ? AND ?",
-      [id, startDate, endDate],
-      (err, rows) => {
-        if (!rows) {
-          return res.status(400).send("No Data Found");
-        }
-        res.status(200).json(rows);
-      }
-    );
-  } catch (error) {
-    console.error(error);
-    res
-      .status(500)
-      .json({ error: "Internal Server Error, Please try again later!" });
-  }
-});
-
-app.post("/finances", auth, (req, res) => {
-  try {
-    const { id } = req.user;
-    const { category, costs, date } = req.body;
-
-    if (!category || !costs || !date) {
-      return res.status(400).json({ error: "Missing required fields" });
-    }
-
-    db.run(
-      `INSERT INTO finances (user_id, category, costs, date)
-       VALUES (?, ?, ?, ?)`,
-      [id, category, costs, date],
-      function (err) {
-        if (err) {
-          console.error(err);
-          return res
-            .status(500)
-            .json({ error: "Database Error, please try again later!" });
-        }
-
-        res.status(201).json({
-          message: "Finance entry created successfully",
-        });
-      }
-    );
-  } catch (error) {
-    console.error(error);
-    res
-      .status(500)
-      .json({ error: "Internal Server Error, Please try again later!" });
-  }
-});
-
 // Calendar API Routes
 // Calender Get
 
@@ -226,10 +157,36 @@ app.get("/calendar", auth, (req, res) => {
   
 });
 
+// Calendar Post 
 
+app.post("/calendar", auth, (req, res) => {
+  const { cal_date, cal_time ,cal_title, cal_description } = req.body;
+  const { id } = req.user;
+
+  db.run(
+    "INSERT INTO calendar_list (cal_title, cal_date, cal_time, user_id, cal_description) VALUES (?, ?, ?, ?, ?)",
+    [cal_title, cal_date, cal_time, id, cal_description],
+    (err) => {
+      if (err) {
+        res.status(500).send("Error in the query request. Please check the error in the console.");
+        console.log(err);
+      } else {
+        res.status(201).send("Calendar entry created successfully!");
+      }
+    }
+  );
+})
 
 // Calendar API Routes End
 
+// Testroute mit der Token Überprüfung
+
+app.get("/protected", auth, (req, res) => {
+  console.log(req.user);
+  const { id, username } = req.user;
+  console.log(id);
+  res.send("Du bist eingeloggt!");
+});
 
 app.listen(port, () => {
   console.log(`Server läuft auf Port ${port}`);
