@@ -278,13 +278,13 @@ app.get("/calendar", auth, (req, res) => {
       }
     }
   );
-  
+
 });
 
 // Calendar Post 
 
 app.post("/calendar", auth, (req, res) => {
-  const { cal_date, cal_time ,cal_title, cal_description } = req.body;
+  const { cal_date, cal_time, cal_title, cal_description } = req.body;
   const { id } = req.user;
 
   db.run(
@@ -317,6 +317,31 @@ app.get("/shoppinglist", auth, (req, res) => {
           return res.status(400).send("no data found");
         }
         res.status(200).json(rows);
+      }
+    );
+  } catch (error) {
+    console.error(error);
+    res
+      .status(500)
+      .json({ error: "Internal Server Error, please try again later!" });
+  }
+})
+
+app.post("/shoppinglist", auth, (req, res) => {
+  try {
+    const { id } = req.user;
+    const { item, quantity, price, date } = req.body;
+
+    db.run(
+      "INSERT INTO shoppinglist (user_id, item, quantity, price, date) VALUES (?, ?, ?, ?, ?)",
+      [id, item, quantity, price, date],
+      (err) => {
+        if (err) {
+          res.status(500).send("Error in the query request. Please check the error in the console.");
+          console.log(err);
+        } else {
+          res.status(201).send("Shopping List entry created successfully!");
+        }
       }
     );
   } catch (error) {
