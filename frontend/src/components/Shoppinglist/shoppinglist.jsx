@@ -130,7 +130,7 @@ const ShoppingList = () => {
                     <input
                         type="text"
                         value={newItem}
-                        onChange={(e) => setNewItem(e.target.value)}
+                        onChange={(event) => setNewItem(event.target.value)}
                         placeholder="Add new item..."
                         className="shopping-list-input"
                     />
@@ -175,7 +175,7 @@ const ShoppingList = () => {
                             <input
                                 type="number"
                                 value={item.quantity}
-                                onChange={(e) => updateQuantity(item.id, parseInt(e.target.value))}
+                                onChange={(event) => updateQuantity(item.id, parseInt(event.target.value))}
                                 min="1"
                                 className="quantity-input"
                             />
@@ -183,7 +183,7 @@ const ShoppingList = () => {
                                 <input
                                     type="number"
                                     value={item.price}
-                                    onChange={(e) => updatePrice(item.id, e.target.value)}
+                                    onChange={(event) => updatePrice(item.id, e.target.value)}
                                     step="0.01"
                                     min="0"
                                     className="price-input"
