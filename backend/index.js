@@ -395,6 +395,50 @@ app.post("/shoppinglist", auth, (req, res) => {
   }
 })
 
+app.put("/shoppinglist/:id", auth, (req, res) => {
+  try {
+    const { id } = req.params;
+    const { item, quantity, price, date } = req.body;
+
+    db.run(
+      "UPDATE shoppinglist SET item = ?, quantity = ?, price = ?, date = ? WHERE id = ?",
+      [item, quantity, price, date, id],
+      (err) => {
+        if (err) {
+          res.status(500).send("Error in the query request. Please check the error in the console.");
+          console.log(err);
+        } else {
+          res.status(200).send("Shopping List entry updated successfully!");
+        }
+      }
+    );
+  } catch (error) {
+    console.error(error);
+    res
+      .status(500)
+      .json({ error: "Internal Server Error, please try again later!" });
+  }
+})
+
+app.delete("/shoppinglist/:id", auth, (req, res) => {
+  try {
+    const { id } = req.params;
+    db.run("DELETE FROM shoppinglist WHERE id = ?", [id], (err) => {
+      if (err) {
+        res.status(500).send("Error in the query request. Please check the error in the console.");
+        console.log(err);
+      } else {
+        res.status(200).send("Shopping List entry deleted successfully!");
+      }
+    });
+  } catch (error) {
+    console.error(error);
+    res
+      .status(500)
+      .json({ error: "Internal Server Error, please try again later!" });
+  }
+});
+
 // Shoppinglist End
 
 // To-Do
