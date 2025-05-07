@@ -344,6 +344,57 @@ app.post("/calendar", auth, (req, res) => {
   );
 });
 
+// Calendar Put
+
+app.put("/calendar/:cal_id", auth, (req, res) => {
+  const { cal_id } = req.params;
+  const { cal_date, cal_time, cal_title, cal_description } = req.body;
+  const { id } = req.user;
+
+  console.log(req.params)
+  db.run(
+    "UPDATE calendar_list SET cal_title = ?, cal_date = ?, cal_time = ?, cal_description = ? WHERE cal_id = ? AND user_id = ?",
+    [cal_title, cal_date, cal_time, cal_description, cal_id, id],
+    (err) => {
+      if (err) {
+        res
+          .status(500)
+          .send(
+            "Error in the query request. Please check the error in the console."
+          );
+        console.log(err);
+      } else {
+        res.status(200).send("Calendar entry updated successfully!");
+      }
+    }
+  );
+});	
+
+
+// Calendar Delete
+
+app.delete("/calendar/:cal_id", auth, (req, res) => {
+  const { cal_id } = req.params;
+  const { id } = req.user;
+
+  db.run(
+    "DELETE FROM calendar_list WHERE cal_id = ? AND user_id = ?",
+    [cal_id, id],
+    (err) => {
+      if (err) {
+        res
+          .status(500)
+          .send(
+            "Error in the query request. Please check the error in the console."
+          );
+        console.log(err);
+      } else {
+        res.status(200).send("Calendar entry deleted successfully!");
+      }
+    }
+  );
+});
+
 // Calendar API Routes End
 
 // Shopping-List
