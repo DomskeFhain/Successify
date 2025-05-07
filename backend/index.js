@@ -368,7 +368,7 @@ app.put("/calendar/:cal_id", auth, (req, res) => {
       }
     }
   );
-});	
+});
 
 
 // Calendar Delete

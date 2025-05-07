@@ -1,30 +1,78 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import axios from 'axios';
 import './shoppinglist.css';
+import { useAuth } from '../../components/AuthContex/AuthContex';
 
 const ShoppingList = () => {
     const [items, setItems] = useState([]);
     const [newItem, setNewItem] = useState('');
     const [quantity, setQuantity] = useState(1);
     const [price, setPrice] = useState('');
+    const [date, setDate] = useState(new Date().toISOString().split('T')[0]);
+    const [error, setError] = useState('');
+    const { token } = useAuth();
 
-    const handleAddItem = (event) => {
-        event.preventDefault();
-        if (newItem.trim() !== '') {
-            setItems([...items, {
-                id: Date.now(),
-                name: newItem,
-                completed: false,
-                quantity: quantity,
-                price: parseFloat(price) || 0
-            }]);
-            setNewItem('');
-            setQuantity(1);
-            setPrice('');
+    console.log('Token:', token); // teste das Token
+
+    const fetchShoppingList = async () => {
+        try {
+            const response = await axios.get('http://localhost:9000/shoppinglist', {
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            });
+            setItems(response.data);
+            setError('');
+        } catch (err) {
+            setError('Fehler beim Laden der Shoppingliste.');
+            console.error('Fehler beim Laden der Shoppingliste:', err);
         }
     };
 
-    const handleDeleteItem = (id) => {
-        setItems(items.filter(item => item.id !== id));
+    useEffect(() => {
+        fetchShoppingList();
+    }, [token]);
+
+    const handleAddItem = async (event) => {
+        event.preventDefault();
+        if (newItem.trim() !== '') {
+            try {
+                await axios.post('http://localhost:9000/shoppinglist', {
+                    item: newItem,
+                    quantity: quantity,
+                    price: parseFloat(price) || 0,
+                    date: date
+                }, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+                fetchShoppingList();
+                setNewItem('');
+                setQuantity(1);
+                setPrice('');
+                setDate(new Date().toISOString().split('T')[0]);
+                setError('');
+            } catch (err) {
+                setError('Fehler beim Hinzufügen des Items.');
+                console.error('Fehler beim Hinzufügen des Items:', err);
+            }
+        }
+    };
+
+    const handleDeleteItem = async (id) => {
+        try {
+            await axios.delete(`http://localhost:9000/shoppinglist/${id}`, {
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            });
+            fetchShoppingList();
+            setError('');
+        } catch (err) {
+            setError('Fehler beim Löschen des Items.');
+            console.error('Fehler beim Löschen des Items:', err);
+        }
     };
 
     const toggleComplete = (id) => {
@@ -33,18 +81,40 @@ const ShoppingList = () => {
         ));
     };
 
-    const updateQuantity = (id, newQuantity) => {
+    const updateQuantity = async (id, newQuantity) => {
         if (newQuantity > 0) {
-            setItems(items.map(item =>
-                item.id === id ? { ...item, quantity: newQuantity } : item
-            ));
+            try {
+                await axios.put(`http://localhost:9000/shoppinglist/${id}`, {
+                    quantity: newQuantity
+                }, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+                fetchShoppingList();
+                setError('');
+            } catch (err) {
+                setError('Fehler beim Aktualisieren der Menge.');
+                console.error('Fehler beim Aktualisieren der Menge:', err);
+            }
         }
     };
 
-    const updatePrice = (id, newPrice) => {
-        setItems(items.map(item =>
-            item.id === id ? { ...item, price: parseFloat(newPrice) || 0 } : item
-        ));
+    const updatePrice = async (id, newPrice) => {
+        try {
+            await axios.put(`http://localhost:9000/shoppinglist/${id}`, {
+                price: parseFloat(newPrice) || 0
+            }, {
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            });
+            fetchShoppingList();
+            setError('');
+        } catch (err) {
+            setError('Fehler beim Aktualisieren des Preises.');
+            console.error('Fehler beim Aktualisieren des Preises:', err);
+        }
     };
 
     const calculateTotal = () => {
@@ -54,6 +124,7 @@ const ShoppingList = () => {
     return (
         <div className="shopping-list-container">
             <h2>Shopping List</h2>
+            {error && <p className="error-message">{error}</p>}
             <form onSubmit={handleAddItem} className="shopping-list-form">
                 <div className="form-row">
                     <input
@@ -82,6 +153,12 @@ const ShoppingList = () => {
                         />
                         <span className="euro-symbol">€</span>
                     </div>
+                    <input
+                        type="date"
+                        className="date-input"
+                        value={date}
+                        onChange={(event) => setDate(event.target.value)}
+                    />
                     <button type="submit" className="add-button">Add Item</button>
                 </div>
             </form>
@@ -93,7 +170,7 @@ const ShoppingList = () => {
                             checked={item.completed}
                             onChange={() => toggleComplete(item.id)}
                         />
-                        <span className="item-name">{item.name}</span>
+                        <span className="item-name">{item.item}</span>
                         <div className="item-details">
                             <input
                                 type="number"
@@ -133,4 +210,4 @@ const ShoppingList = () => {
     );
 };
 
-export default ShoppingList; 
+export default ShoppingList;
