@@ -6,6 +6,7 @@ import Home from "./pages/home/home";
 import Navbar from "./components/Navbar/navbar";
 import Register from "./pages/register/register";
 import Login from "./pages/login/Login";
+import Calendar from "./pages/calendar/calendar";
 import { AuthProvider } from "./components/AuthContex/AuthContex";
 
 const root = ReactDOM.createRoot(document.getElementById("root"));
@@ -18,6 +19,8 @@ root.render(
           <Route path="/" element={<Home />} />
           <Route path="/register" element={<Register />} />
           <Route path="/login" element={<Login />} />
+          <Route path="/calendar" element={<Calendar />} />
+          <Route path="*" element={<div>404 Not Found</div>} />
         </Routes>
       </Router>
     </AuthProvider>
