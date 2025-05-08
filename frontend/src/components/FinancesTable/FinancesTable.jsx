@@ -13,9 +13,13 @@ import DialogContent from "@mui/material/DialogContent";
 import DialogActions from "@mui/material/DialogActions";
 import TextField from "@mui/material/TextField";
 import Button from "@mui/material/Button";
+import FormControl from "@mui/material/FormControl";
+import Select from "@mui/material/Select";
+import InputLabel from "@mui/material/InputLabel";
+import MenuItem from "@mui/material/MenuItem";
 import { useState } from "react";
 
-export default function FinancesTable({ rows, onUpdate }) {
+export default function FinancesTable({ rows, onUpdate, categorys }) {
   const { token, logout } = useAuth();
   const navigate = useNavigate();
   const [editData, setEditData] = useState(null);
@@ -93,7 +97,7 @@ export default function FinancesTable({ rows, onUpdate }) {
 
   const columns = [
     { field: "category", headerName: "Category", width: 150 },
-    { field: "costs", headerName: "Costs (€)", type: "number", width: 150 },
+    { field: "costs", headerName: "Expenses (€)", type: "number", width: 150 },
     { field: "date", headerName: "Date", width: 150 },
     {
       field: "edit",
@@ -188,16 +192,24 @@ export default function FinancesTable({ rows, onUpdate }) {
         <DialogContent
           sx={{ display: "flex", flexDirection: "column", gap: 2, mt: 1 }}
         >
-          <TextField
-            name="category"
-            label="Category"
-            value={editData?.category || ""}
-            onChange={handleChange}
-            sx={{ marginTop: "0.5rem" }}
-          />
+          <FormControl sx={{ minWidth: 200, marginTop: "0.5rem" }}>
+            <InputLabel>Category</InputLabel>
+            <Select
+              name="category"
+              label="Category"
+              value={editData?.category || ""}
+              onChange={handleChange}
+            >
+              {categorys.map((category, index) => (
+                <MenuItem key={index} value={category}>
+                  {category}
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
           <TextField
             name="costs"
-            label="Costs (€)"
+            label="Expanses (€)"
             type="number"
             value={editData?.costs || ""}
             onChange={handleChange}
