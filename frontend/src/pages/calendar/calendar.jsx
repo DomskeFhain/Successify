@@ -1,120 +1,145 @@
-import React, { useState } from 'react';
-import { createRoot } from 'react-dom/client';
+import React, { useEffect, useState } from "react";
 import Scheduler from "react-mui-scheduler";
+import axios from "axios";
+import { useAuth } from "../../components/AuthContex/AuthContex";
+import { useNavigate } from "react-router-dom";
+import Snackbar from "@mui/material/Snackbar";
+import MuiAlert from "@mui/material/Alert";
+
+
 
 function Calendar() {
-  const [state] = useState({
-    options: {
-      transitionMode: "zoom",
-      startWeekOn: "mon",
-      defaultMode: "month",
-      minWidth: 540,
-      maxWidth: 540,
-      minHeight: 540,
-      maxHeight: 540
-    },
-    alertProps: {
-      open: true,
-      color: "info",
-      severity: "info",
-      message: "🚀 Let's start with awesome react-mui-scheduler 🔥 🔥 🔥",
-      showActionButton: true,
-      showNotification: true,
-      delay: 1500
-    },
-    toolbarProps: {
-      showSearchBar: true,
-      showSwitchModeButtons: true,
-      showDatePicker: true
-    }
+  const navigate = useNavigate();
+  const { token, logout } = useAuth();
+  const [events, setEvents] = useState([]);
+  const [alertProps, setAlertProps] = useState({
+    open: false,
+    color: "info",
+    severity: "info",
+    message: "",
+    showActionButton: false,
+    showNotification: true,
+    delay: 1500
   });
 
-  const events = [
-    {
-      id: "event-1",
-      label: "Medical consultation",
-      groupLabel: "Dr Shaun Murphy",
-      user: "Dr Shaun Murphy",
-      color: "#f28f6a",
-      startHour: "04:00 AM",
-      endHour: "05:00 AM",
-      date: "2022-05-05",
-      createdAt: new Date(),
-      createdBy: "Kristina Mayer"
-    },
-    {
-      id: "event-2",
-      label: "Medical consultation",
-      groupLabel: "Dr Claire Brown",
-      user: "Dr Claire Brown",
-      color: "#099ce5",
-      startHour: "09:00 AM",
-      endHour: "10:00 AM",
-      date: "2022-05-09",
-      createdAt: new Date(),
-      createdBy: "Kristina Mayer"
-    },
-    {
-      id: "event-3",
-      label: "Medical consultation",
-      groupLabel: "Dr Menlendez Hary",
-      user: "Dr Menlendez Hary",
-      color: "#263686",
-      startHour: "13 PM",
-      endHour: "14 PM",
-      date: "2022-05-10",
-      createdAt: new Date(),
-      createdBy: "Kristina Mayer"
-    },
-    {
-      id: "event-4",
-      label: "Consultation prénatale",
-      groupLabel: "Dr Shaun Murphy",
-      user: "Dr Shaun Murphy",
-      color: "#f28f6a",
-      startHour: "08:00 AM",
-      endHour: "09:00 AM",
-      date: "2022-05-11",
-      createdAt: new Date(),
-      createdBy: "Kristina Mayer"
-    }
-  ];
+  const Alert = React.forwardRef(function Alert(props, ref) {
+    return <MuiAlert elevation={6} ref={ref} variant="filled" {...props} />;
+  });
 
-  const handleCellClick = (event, row, day) => {
-    // Do something...
+  const currentDate = new Date();
+  const currentMonth = String(currentDate.getMonth() + 1).padStart(2, "0");
+  const currentYear = currentDate.getFullYear();
+
+  const schedulerOptions = {
+    transitionMode: "zoom",
+    startWeekOn: "mon",
+    defaultMode: "month",
+    minWidth: 540,
+    maxWidth: 540,
+    minHeight: 540,
+    maxHeight: 540
   };
 
-  const handleEventClick = (event, item) => {
-    // Do something...
+  const toolbarOptions = {
+    showSearchBar: true,
+    showSwitchModeButtons: true,
+    showDatePicker: true
   };
 
-  const handleEventsChange = (item) => {
-    // Do something...
-  };
+  useEffect(() => {
+    let isMounted = true;
 
-  const handleAlertCloseButtonClicked = (item) => {
-    // Do something...
+    axios
+      .get(`http://localhost:9000/calendar?month=${currentMonth}&year=${currentYear}`, {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      })
+      .then((res) => {
+        if (isMounted) {
+          const mapped = res.data.map((entry) => ({
+            id: entry.cal_id.toString(),
+            label: entry.cal_title,
+            groupLabel: "Event",
+            user: "User",
+            color: "#ff0000",
+            startHour: entry.cal_time,
+            endHour: entry.cal_time,
+            date: entry.cal_date,
+            createdAt: new Date(),
+            createdBy: "You",
+            description: entry.cal_description
+          }));
+          setEvents(mapped);
+          setAlertProps((prev) => ({
+            ...prev,
+            open: true,
+            color: "info",
+            severity: "info",
+            message: "✅ Your Calnendar is up to date",
+            showActionButton: false,
+          }));
+        }
+      })
+      .catch((err) => {
+        console.error("Error while loading events:", err);
+        setAlertProps((prev) => ({
+          ...prev,
+          open: true,
+          color: "error",
+          severity: "error",
+          message: "❌ Error while loading events",
+        }));
+
+        if (
+          err.response &&
+          (err.response.status === 401 || err.response.status === 403)
+        ) {
+          logout();
+          navigate("/login");
+        }
+      });
+
+    return () => {
+      isMounted = false;
+    };
+  }, [token, logout]);
+
+  const handleEventsChange = (newEventList) => {
+    setEvents(newEventList);
   };
 
   return (
-    <Scheduler
-      locale="en"
-      events={events}
-      legacyStyle={false}
-      options={state?.options}
-      alertProps={state?.alertProps}
-      toolbarProps={state?.toolbarProps}
-      onEventsChange={handleEventsChange}
-      onCellClick={handleCellClick}
-      onTaskClick={handleEventClick}
-      onAlertCloseButtonClicked={handleAlertCloseButtonClicked}
-    />
+    <>
+      <Scheduler
+        key={events.length}
+        locale="de"
+        events={events}
+        legacyStyle={false}
+        options={schedulerOptions}
+        toolbarProps={toolbarOptions}
+        onEventsChange={handleEventsChange}
+        onCellClick={() => { }}
+        onTaskClick={() => { }}
+        onAlertCloseButtonClicked={() =>
+          setAlertProps((prev) => ({ ...prev, open: false }))
+        }
+      />
+      <Snackbar
+        open={alertProps.open}
+        autoHideDuration={alertProps.delay}
+        onClose={() => setAlertProps((prev) => ({ ...prev, open: false }))}
+      >
+        <Alert
+          onClose={() => setAlertProps((prev) => ({ ...prev, open: false }))}
+          severity={alertProps.severity}
+          sx={{ width: "100%" }}
+        >
+          {alertProps.message}
+        </Alert>
+      </Snackbar>
+    </>
   );
 }
-
-// ✅ Neues Root-System für React 18+ BY Chagpt
-const container = document.querySelector('#root');
-const root = createRoot(container);
-root.render(<Calendar />);
 
 export default Calendar;
