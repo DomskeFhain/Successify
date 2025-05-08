@@ -17,6 +17,7 @@ function Todo() {
   const [editTaskId, setEditTaskId] = useState(null);
   const [editTaskName, setEditTaskName] = useState("");
   const [editModeTask, setEditModeTask] = useState(false);
+  
 
   const axiosAuth = axios.create({
     baseURL: "http://localhost:9000",
@@ -84,7 +85,7 @@ function Todo() {
   const getTask = async (listID) => {
     try {
       const res = await axiosAuth.get(`/tasks/${listID}`);
-      return res.data;
+      return setTasks(res.data);
     } catch (error) {
       handleError(error);
     }
@@ -118,6 +119,7 @@ function Todo() {
   };
 
 
+
 // render
 
   useEffect(() => {
@@ -146,45 +148,17 @@ function Todo() {
           const selectedList = lists.find((list) => list.listID === selectedId);
           setEditListId(selectedList.listID);
           setEditListName(selectedList.listName);
+          getTask(selectedId);
         }}
         value={editListId || ""}
       >
         <option value="" disabled>Liste auswählen</option>
         {lists.map((list) => (
-          <option key={list.listID} value={list.listID}>
+          <option onChange={(e) => getTask(list.listID)} setkey={list.listID} value={list.listID}>
             {list.listName}
           </option>
         ))}
       </select>
-
-      <input
-        type="text"
-        placeholder="Neuer Eintrag eingeben"
-        value={newTaskName}
-        onChange={(e) => setNewTaskName(e.target.value)}
-      />
-      <button onClick={() => postTask(editListId)}>Hinzufügen</button>
-
-      <ul>
-        {tasks.map((task) => (
-          <li key={task.taskID}>
-            {task.taskName}
-            <button onClick={() => deleteTask(task.taskID)}>Löschen</button>
-            <button onClick={() => setEditTaskId(task.taskID)}>Bearbeiten</button>
-            {editTaskId === task.taskID && (
-              <div className="edit-controls">
-                <input
-                  type="text"
-                  value={editTaskName}
-                  onChange={(e) => setEditTaskName(e.target.value)}
-                />
-                <button onClick={() => updateTask(task.taskID)}>Speichern</button>
-                <button onClick={() => setEditTaskId(null)}>Abbrechen</button>
-              </div>
-            )}
-          </li>
-        ))}
-      </ul>
 
       {editListId && (
         <>
@@ -211,6 +185,37 @@ function Todo() {
               <button onClick={() => setEditMode(false)}>Abbrechen</button>
             </div>
           )}
+
+      <input
+        type="text"
+        placeholder="Neuer Eintrag eingeben"
+        value={newTaskName}
+        onChange={(e) => setNewTaskName(e.target.value)}
+      />
+      <button onClick={() => {postTask(editListId); getTask(editListId)}}>Hinzufügen</button>
+
+      <ul>
+        {tasks.map((task) => (
+          <li key={task.taskID}>
+            {task.taskName}
+            <button onClick={() => {deleteTask(task.taskID); getTask(editListId)}}>Löschen</button>
+            <button onClick={() => setEditTaskId(task.taskID)}>Bearbeiten</button>
+            {editTaskId === task.taskID && (
+              <div className="edit-controls">
+                <input
+                  type="text"
+                  value={editTaskName}
+                  onChange={(e) => setEditTaskName(e.target.value)}
+                />
+                <button onClick={() => updateTask(task.taskID)}>Speichern</button>
+                <button onClick={() => setEditTaskId(null)}>Abbrechen</button>
+              </div>
+            )}
+          </li>
+        ))}
+      </ul>
+
+
         </>
       )}
     </div>
