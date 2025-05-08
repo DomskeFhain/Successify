@@ -11,6 +11,12 @@ function Todo() {
   const [newListName, setNewListName] = useState("");
   const [editListId, setEditListId] = useState(null);
   const [editListName, setEditListName] = useState("");
+  const [editMode, setEditMode] = useState(false);
+  const [tasks, setTasks] = useState([]);
+  const [newTaskName, setNewTaskName] = useState("");
+  const [editTaskId, setEditTaskId] = useState(null);
+  const [editTaskName, setEditTaskName] = useState("");
+  const [editModeTask, setEditModeTask] = useState(false);
 
   const axiosAuth = axios.create({
     baseURL: "http://localhost:9000",
@@ -18,6 +24,10 @@ function Todo() {
       Authorization: `Bearer ${token}`,
     },
   });
+
+//functions
+
+// handle error
 
   const handleError = (error) => {
     if (error.response && (error.response.status === 401 || error.response.status === 403)) {
@@ -27,6 +37,8 @@ function Todo() {
       console.error("Error:", error);
     }
   };
+
+// list routes x functions
 
   const getList = async () => {
     try {
@@ -67,53 +79,143 @@ function Todo() {
     }
   };
 
+// Task Routes x Functions
+
+  const getTask = async (listID) => {
+    try {
+      const res = await axiosAuth.get(`/tasks/${listID}`);
+      return res.data;
+    } catch (error) {
+      handleError(error);
+    }
+  };
+
+  const postTask = async (listID) => {
+    try {
+      await axiosAuth.post(`/tasks/${listID}`, { taskName: newTaskName });
+      getList();
+    } catch (error) {
+      handleError(error);
+    }
+  };
+
+  const deleteTask = async (taskID) => {
+    try {
+      await axiosAuth.delete(`/tasks/${taskID}`);
+      getList();
+    } catch (error) {
+      handleError(error);
+    }
+  };
+
+  const updateTask = async (taskID) => {
+    try {
+      await axiosAuth.put(`/tasks/${taskID}`, { taskName: editTaskName });
+      getList();
+    } catch (error) {
+      handleError(error);
+    }
+  };
+
+
+// render
+
   useEffect(() => {
     getList();
   }, []);
 
   return (
-    <div className="todo">
-      <h1>Meine ToDo-Listen</h1>
+<div className="todo">
+  <h1>Meine ToDo-Listen</h1>
 
-      <div className="new-list">
-        <input
-          type="text"
-          placeholder="Neue Liste eingeben"
-          value={newListName}
-          onChange={(e) => setNewListName(e.target.value)}
-        />
-        <button onClick={postList}>Hinzufügen</button>
-      </div>
+  <div className="new-list">
+    <input
+      type="text"
+      placeholder="Neue Liste eingeben"
+      value={newListName}
+      onChange={(e) => setNewListName(e.target.value)}
+    />
+    <button onClick={postList}>Hinzufügen</button>
+  </div>
 
-      <ul className="list-container">
+  {lists.length > 0 && (
+    <div className="dropdown-container">
+      <select
+        onChange={(e) => {
+          const selectedId = parseInt(e.target.value);
+          const selectedList = lists.find((list) => list.listID === selectedId);
+          setEditListId(selectedList.listID);
+          setEditListName(selectedList.listName);
+        }}
+        value={editListId || ""}
+      >
+        <option value="" disabled>Liste auswählen</option>
         {lists.map((list) => (
-          <li key={list.listID} className="list-item">
-            {editListId === list.listID ? (
-              <>
+          <option key={list.listID} value={list.listID}>
+            {list.listName}
+          </option>
+        ))}
+      </select>
+
+      <input
+        type="text"
+        placeholder="Neuer Eintrag eingeben"
+        value={newTaskName}
+        onChange={(e) => setNewTaskName(e.target.value)}
+      />
+      <button onClick={() => postTask(editListId)}>Hinzufügen</button>
+
+      <ul>
+        {tasks.map((task) => (
+          <li key={task.taskID}>
+            {task.taskName}
+            <button onClick={() => deleteTask(task.taskID)}>Löschen</button>
+            <button onClick={() => setEditTaskId(task.taskID)}>Bearbeiten</button>
+            {editTaskId === task.taskID && (
+              <div className="edit-controls">
                 <input
                   type="text"
-                  value={editListName}
-                  onChange={(e) => setEditListName(e.target.value)}
+                  value={editTaskName}
+                  onChange={(e) => setEditTaskName(e.target.value)}
                 />
-                <button onClick={updateList}>Speichern</button>
-                <button onClick={() => setEditListId(null)}>Abbrechen</button>
-              </>
-            ) : (
-              <>
-                <span>{list.listName}</span>
-                <button onClick={() => {
-                  setEditListId(list.listID);
-                  setEditListName(list.listName);
-                }}>
-                  Bearbeiten
-                </button>
-                <button onClick={() => deleteList(list.listID)}>Löschen</button>
-              </>
+                <button onClick={() => updateTask(task.taskID)}>Speichern</button>
+                <button onClick={() => setEditTaskId(null)}>Abbrechen</button>
+              </div>
             )}
           </li>
         ))}
       </ul>
+
+      {editListId && (
+        <>
+          <div className="edit-buttons">
+            <button onClick={() => setEditMode(true)}>Bearbeiten</button>
+            <button onClick={() => deleteList(editListId)}>Löschen</button>
+          </div>
+
+          {editMode && (
+            <div className="edit-controls">
+              <input
+                type="text"
+                value={editListName}
+                onChange={(e) => setEditListName(e.target.value)}
+              />
+              <button
+                onClick={() => {
+                  updateList();
+                  setEditMode(false);
+                }}
+              >
+                Speichern
+              </button>
+              <button onClick={() => setEditMode(false)}>Abbrechen</button>
+            </div>
+          )}
+        </>
+      )}
     </div>
+  )}
+</div>
   );
 }
 
