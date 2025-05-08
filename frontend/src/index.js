@@ -7,6 +7,7 @@ import Navbar from "./components/Navbar/navbar";
 import Register from "./pages/register/register";
 import Login from "./pages/login/Login";
 import { AuthProvider } from "./components/AuthContex/AuthContex";
+import Finances from "./pages/Finances/Finances";
 
 const root = ReactDOM.createRoot(document.getElementById("root"));
 root.render(
@@ -18,6 +19,7 @@ root.render(
           <Route path="/" element={<Home />} />
           <Route path="/register" element={<Register />} />
           <Route path="/login" element={<Login />} />
+          <Route path="/finances" element={<Finances />} />
         </Routes>
       </Router>
     </AuthProvider>
