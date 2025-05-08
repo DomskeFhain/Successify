@@ -153,7 +153,7 @@ app.get("/monthlyFinances", auth, (req, res) => {
       [id, startDate, endDate],
       (err, rows) => {
         if (rows.length === 0) {
-          return res.status(400).send("No Data Found");
+          return res.status(404).send("No Data Found");
         }
         res.status(200).json(rows);
       }

@@ -9,6 +9,7 @@ import Register from "./pages/register/register";
 import Login from "./pages/login/Login";
 import Calendar from "./pages/calendar/calendar";
 import { AuthProvider } from "./components/AuthContex/AuthContex";
+import Finances from "./pages/Finances/Finances";
 
 const root = ReactDOM.createRoot(document.getElementById("root"));
 root.render(
@@ -22,6 +23,7 @@ root.render(
           <Route path="/login" element={<Login />} />
           <Route path="/calendar" element={<Calendar />} />
           <Route path="/shoppinglist" element={<ShoppingList />} />
+          <Route path="/finances" element={<Finances />} />
           <Route path="*" element={<div>404 Not Found</div>} />
         </Routes>
       </Router>
