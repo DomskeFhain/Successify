@@ -105,7 +105,6 @@ router.put("/tasks/:taskId", auth, (req, res) => {
 
 router.delete("/tasks/:taskId", auth, (req, res) => {
   const id = req.params.taskId;
-  console.log(id);
   db.run("DELETE FROM tasksList WHERE taskId = ?", [id], (err) => {
     if (err) {
       return res.status(500).send("ERROR!");

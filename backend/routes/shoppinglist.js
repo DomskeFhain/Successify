@@ -6,7 +6,6 @@ const auth = require("../middleware/auth");
 router.get("/shoppinglist", auth, (req, res) => {
   try {
     const { id } = req.user;
-    console.log(id);
     db.all(
       "SELECT * FROM shoppinglist WHERE user_id = ?",
       [id],
