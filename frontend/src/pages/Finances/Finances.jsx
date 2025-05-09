@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from "react";
 import "./Finances.css";
 import axios from "axios";
-import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../components/AuthContex/AuthContex";
+import { useApiErrorHandler } from "../../components/HandleApiError/HandleApiError";
 import FinancesTable from "../../components/FinancesTable/FinancesTable";
 import FinancesPieChart from "../../components/FinancesPieChart/FinancesPieChart";
 import MenuItem from "@mui/material/MenuItem";
@@ -17,7 +17,8 @@ import DialogActions from "@mui/material/DialogActions";
 import TextField from "@mui/material/TextField";
 
 function Finances() {
-  const { token, logout } = useAuth();
+  const { token } = useAuth();
+  const handleError = useApiErrorHandler();
   const [finances, setFinances] = useState(null);
   const [month, setMonth] = useState(new Date().getMonth() + 1);
   const [year, setYear] = useState(new Date().getFullYear());
@@ -26,8 +27,6 @@ function Finances() {
   const [addData, setAddData] = useState(null);
   const [addErrorCategory, setAddErrorCategory] = useState(null);
   const [addErrorCosts, setAddErrorCosts] = useState(null);
-
-  const navigate = useNavigate();
 
   const financeCategories = [
     "Rent",
@@ -93,15 +92,7 @@ function Finances() {
       handleClose();
       loadFinances();
     } catch (error) {
-      if (
-        error.response &&
-        (error.response.status === 401 || error.response.status === 403)
-      ) {
-        logout();
-        navigate("/login");
-      } else {
-        console.error("Error during Saving Attempt:", error);
-      }
+      handleError(error);
     }
   };
 
@@ -126,17 +117,10 @@ function Finances() {
 
       setFinances(response.data);
     } catch (error) {
-      if (
-        error.response &&
-        (error.response.status === 401 || error.response.status === 403)
-      ) {
-        logout();
-        navigate("/login");
-      } else if (error.response.status === 404) {
+      if (error.response.status === 404) {
         setFinances(null);
-      } else {
-        console.error("Error:", error);
       }
+      handleError(error);
     }
   }
 

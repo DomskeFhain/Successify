@@ -3,6 +3,7 @@ import axios from "axios";
 import { useAuth } from "../../components/AuthContex/AuthContex";
 import { useNavigate } from "react-router-dom";
 import { DataGrid } from "@mui/x-data-grid";
+import { useApiErrorHandler } from "../HandleApiError/HandleApiError";
 import Paper from "@mui/material/Paper";
 import IconButton from "@mui/material/IconButton";
 import EditIcon from "@mui/icons-material/Edit";
@@ -24,6 +25,7 @@ export default function FinancesTable({ rows, onUpdate, categorys }) {
   const navigate = useNavigate();
   const [editData, setEditData] = useState(null);
   const [open, setOpen] = useState(false);
+  const handleError = useApiErrorHandler();
 
   const handleEdit = (row) => {
     setEditData(row);
@@ -83,15 +85,7 @@ export default function FinancesTable({ rows, onUpdate, categorys }) {
 
       if (onUpdate) onUpdate();
     } catch (error) {
-      if (
-        error.response &&
-        (error.response.status === 401 || error.response.status === 403)
-      ) {
-        logout();
-        navigate("/login");
-      } else {
-        console.error("Error during Deletion:", error);
-      }
+      handleError(error);
     }
   };
 
