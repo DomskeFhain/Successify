@@ -573,15 +573,53 @@ app.post("/tasks/:listId", auth, (req, res) => {
 
 app.put("/tasks/:taskId", auth, (req, res) => {
   const id = req.params.taskId;
-  const taskName = req.body.taskName;
-  db.run("UPDATE tasksList SET taskName = ? WHERE listId = ?", [taskName, id], (err) => {
+  const { taskName, taskDone } = req.body;
+  let query = "";
+  let params = [];
+  if (taskName) {
+    query = "UPDATE tasksList SET taskName = ? WHERE listId = ?";
+    params = [taskName, id];
+  } else if (taskDone !== undefined) {
+    query = "UPDATE tasksList SET taskDone = ? WHERE listId = ?";
+    params = [taskDone, id];
+  } else {
+    return res.status(400).json({ message: "Nothing to update" });
+  }
+  db.run(query, params, (err) => {
     if (err) {
-      return res.status(500).send("ERROR!");
+      return res.status(500).send("ERROR");
     } else {
-      return res.status(200).json([{ message: "Task updated successfully", }]);
+      return res.status(200).json({ message: "Task updated successfully" });
     }
   });
-})
+});
+
+// app.put("/tasks/:taskId", auth, (req, res) => {
+//   const id = req.params.taskId;
+//   const taskName = req.body.taskName;
+//   const taskDone = req.body.taskDone;
+//   console.log(taskDone);
+//   console.log(taskName);
+//   console.log(id);
+//   const updateQuery = "UPDATE tasksList SET taskDone = ? WHERE listId = ?";
+//   const updateTaskQuery = "UPDATE tasksList SET taskName = ? WHERE listId = ?";
+//   let query
+//   if (taskName) {
+//     query = updateTaskQuery
+//   } else if (taskDone !== undefined) {
+//     query = updateQuery
+//   } 
+//   db.run(query, [ taskDone, id], (err) => {
+//     if (err) {
+//       return res.status(500).send("ERROR!");
+//     } else {
+//       return res.status(200).json([{ message: "Task updated successfully", }]);
+//     }
+//   });
+// })  
+  
+
+
 
 app.delete("/tasks/:taskId", auth, (req, res) => {
   const id = req.params.taskId;
