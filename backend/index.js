@@ -292,110 +292,108 @@ app.delete("/finances/:financeId", auth, (req, res) => {
   }
 });
 
-// Calendar API Routes
-// Calender Get
+// Sceduler API START
 
-// Route: http://localhost:9000/calendar?month=05&year=2025
-app.get("/calendar", auth, (req, res) => {
+// =====================
+// GET: Alle Einträge eines Monats
+// Route: GET /sceduler?month=05&year=2025
+// =====================
+app.get("/sceduler", auth, (req, res) => {
   const { month, year } = req.query;
   const { id } = req.user;
 
+  const startDate = `${year}-${month}-01`;
+  const endDate = `${year}-${month}-31`;
+
   db.all(
-    "SELECT * FROM calendar_list WHERE user_id = ? AND cal_date BETWEEN ? AND ?",
-    [id, `${year}-${month}-01`, `${year}-${month}-31`], // Here i make a date range for the month so i become come the full month
+    "SELECT * FROM sceduler WHERE user_id = ? AND sced_date BETWEEN ? AND ?",
+    [id, startDate, endDate],
     (err, rows) => {
       if (err) {
-        res
-          .status(500)
-          .send(
-            "Error in the query request. Please check the error in the console."
-          );
-        console.log(err);
-      } else if (!rows.length) {
-        res.status(404).send("No data found for this user with the id " + id);
-      } else {
-        res.status(200).json(rows);
+        console.error(err);
+        return res.status(500).send("Error in the query request.");
       }
+      if (!rows.length) {
+        return res.status(404).send("No data found for this user.");
+      }
+      res.status(200).json(rows);
     }
   );
 });
 
-// Calendar Post
 
-app.post("/calendar", auth, (req, res) => {
-  const { cal_date, cal_time, cal_title, cal_description } = req.body;
+// =====================
+// POST: Neuen Eintrag erstellen
+// Route: POST /sceduler
+// =====================
+app.post("/sceduler", auth, (req, res) => {
+  const { sced_date, sced_start_time, sced_end_time, sced_title, sced_description, sced_event } = req.body;
   const { id } = req.user;
 
   db.run(
-    "INSERT INTO calendar_list (cal_title, cal_date, cal_time, user_id, cal_description) VALUES (?, ?, ?, ?, ?)",
-    [cal_title, cal_date, cal_time, id, cal_description],
+    `INSERT INTO sceduler (
+      sced_date, sced_start_time, sced_end_time, 
+      sced_title, sced_description, sced_event, user_id
+    ) VALUES (?, ?, ?, ?, ?, ?, ?)`,
+    [sced_date, sced_start_time, sced_end_time, sced_title, sced_description, sced_event, id],
     (err) => {
       if (err) {
-        res
-          .status(500)
-          .send(
-            "Error in the query request. Please check the error in the console."
-          );
-        console.log(err);
-      } else {
-        res.status(201).send("Calendar entry created successfully!");
+        console.error(err);
+        return res.status(500).send("Error creating sceduler entry.");
       }
-    }
-  );
-});
-
-// Calendar Put
-
-app.put("/calendar/:cal_id", auth, (req, res) => {
-  const { cal_id } = req.params;
-  const { cal_date, cal_time, cal_title, cal_description } = req.body;
-  const { id } = req.user;
-
-  console.log(req.params)
-  db.run(
-    "UPDATE calendar_list SET cal_title = ?, cal_date = ?, cal_time = ?, cal_description = ? WHERE cal_id = ? AND user_id = ?",
-    [cal_title, cal_date, cal_time, cal_description, cal_id, id],
-    (err) => {
-      if (err) {
-        res
-          .status(500)
-          .send(
-            "Error in the query request. Please check the error in the console."
-          );
-        console.log(err);
-      } else {
-        res.status(200).send("Calendar entry updated successfully!");
-      }
+      res.status(201).send("sceduler entry created successfully!");
     }
   );
 });
 
 
-// Calendar Delete
-
-app.delete("/calendar/:cal_id", auth, (req, res) => {
-  const { cal_id } = req.params;
+// =====================
+// PUT: Bestehenden Eintrag aktualisieren
+// Route: PUT /sceduler/:sced_id
+// =====================
+app.put("/sceduler/:sced_id", auth, (req, res) => {
+  const { sced_id } = req.params;
+  const { sced_date, sced_start_time, sced_end_time, sced_title, sced_description, sced_event } = req.body;
   const { id } = req.user;
 
   db.run(
-    "DELETE FROM calendar_list WHERE cal_id = ? AND user_id = ?",
-    [cal_id, id],
+    `UPDATE sceduler 
+     SET sced_date = ?, sced_start_time = ?, sced_end_time = ?, 
+         sced_title = ?, sced_description = ?, sced_event = ?
+     WHERE sced_id = ? AND user_id = ?`,
+    [sced_date, sced_start_time, sced_end_time, sced_title, sced_description, sced_event, sced_id, id],
     (err) => {
       if (err) {
-        res
-          .status(500)
-          .send(
-            "Error in the query request. Please check the error in the console."
-          );
-        console.log(err);
-      } else {
-        res.status(200).send("Calendar entry deleted successfully!");
+        console.error(err);
+        return res.status(500).send("Error updating sceduler entry.");
       }
+      res.status(200).send("sceduler entry updated successfully!");
     }
   );
 });
 
-// Calendar API Routes End
+
+// =====================
+// DELETE: Eintrag löschen
+// Route: DELETE /sceduler/:sced_id
+// =====================
+app.delete("/sceduler/:sced_id", auth, (req, res) => {
+  const { sced_id } = req.params;
+  const { id } = req.user;
+
+  db.run(
+    "DELETE FROM sceduler WHERE sced_id = ? AND user_id = ?",
+    [sced_id, id],
+    (err) => {
+      if (err) {
+        console.error(err);
+        return res.status(500).send("Error deleting sceduler entry.");
+      }
+      res.status(200).send("sceduler entry deleted successfully!");
+    }
+  );
+});
+// Sceduler API END
 
 // Shopping-List
 
