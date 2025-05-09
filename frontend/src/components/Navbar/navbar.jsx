@@ -15,7 +15,7 @@ import AdbIcon from '@mui/icons-material/Adb';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../AuthContex/AuthContex';
 
-const pages = [{name: "Calendar", link: "/calendar"}, {name: "Finances", link: "/finances"}, {name: "Shopping-List", link: "/shoppinglist"}, {name: "To-Do", link: "/todo"}];
+const pages = [{name: "Sceduler", link: "/sceduler"}, {name: "Finances", link: "/finances"}, {name: "Shopping-List", link: "/shoppinglist"}, {name: "To-Do", link: "/todo"}];
 
 
 function Navbar() {
