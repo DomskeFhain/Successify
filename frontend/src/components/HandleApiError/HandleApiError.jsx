@@ -1,9 +1,10 @@
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "../AuthContex/AuthContex";
 
 export function useApiErrorHandler() {
   const navigate = useNavigate();
   const { logout } = useAuth();
+  const location = useLocation();
 
   return (error) => {
     if (
@@ -11,7 +12,10 @@ export function useApiErrorHandler() {
       (error.response.status === 401 || error.response.status === 403)
     ) {
       logout();
-      navigate("/login");
+
+      const currentLocation = location.pathname;
+
+      navigate("/login", { state: { from: currentLocation } });
     } else {
       console.error("Error during API Call:", error);
     }
