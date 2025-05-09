@@ -3,16 +3,18 @@ import axios from 'axios';
 import './shoppinglist.css';
 import { useAuth } from '../../components/AuthContex/AuthContex';
 import { useNavigate } from 'react-router-dom';
+import { useApiErrorHandler } from "../HandleApiError/HandleApiError";
+
 
 const ShoppingList = () => {
     const [items, setItems] = useState([]);
-    const navigate = useNavigate();
     const [newItem, setNewItem] = useState('');
     const [quantity, setQuantity] = useState(1);
     const [price, setPrice] = useState('');
     const [date, setDate] = useState(new Date().toISOString().split('T')[0]);
     const [error, setError] = useState('');
     const { token, logout } = useAuth();
+    const handleError = useApiErrorHandler();
 
     const fetchShoppingList = async () => {
         try {
@@ -24,15 +26,7 @@ const ShoppingList = () => {
             setItems(response.data);
             setError('');
         } catch (error) {
-            if (
-                error.response &&
-                (error.response.status === 401 || error.response.status === 403)
-            ) {
-                logout();
-                navigate("/login");
-            } else {
-                console.error("error during saving attempt:", error);
-            }
+            handleError(error);
         }
     };
 
@@ -60,9 +54,8 @@ const ShoppingList = () => {
                 setPrice('');
                 setDate(new Date().toISOString().split('T')[0]);
                 setError('');
-            } catch (err) {
-                setError('Fehler beim Hinzufügen des Items.');
-                console.error('Fehler beim Hinzufügen des Items:', err);
+            } catch (error) {
+                handleError(error);
             }
         }
     };
@@ -76,9 +69,8 @@ const ShoppingList = () => {
             });
             fetchShoppingList();
             setError('');
-        } catch (err) {
-            setError('Fehler beim Löschen des Items.');
-            console.error('Fehler beim Löschen des Items:', err);
+        } catch (error) {
+            handleError(error);
         }
     };
 
@@ -100,9 +92,8 @@ const ShoppingList = () => {
                 });
                 fetchShoppingList();
                 setError('');
-            } catch (err) {
-                setError('Fehler beim Aktualisieren der Menge.');
-                console.error('Fehler beim Aktualisieren der Menge:', err);
+            } catch (error) {
+                handleError(error);
             }
         }
     };
@@ -118,9 +109,8 @@ const ShoppingList = () => {
             });
             fetchShoppingList();
             setError('');
-        } catch (err) {
-            setError('Fehler beim Aktualisieren des Preises.');
-            console.error('Fehler beim Aktualisieren des Preises:', err);
+        } catch (error) {
+            handleError(error);
         }
     };
 
