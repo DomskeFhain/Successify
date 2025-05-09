@@ -1,4 +1,4 @@
-.center-wrapperRegister {
+.center-wrapperLogin {
     display: flex;
     justify-content: center;
     margin: 2rem;
@@ -6,7 +6,7 @@
 
 
 
-.reg_formRegister {
+.reg_formLogin {
     display: flex;
     flex-direction: column;
     align-items: center;

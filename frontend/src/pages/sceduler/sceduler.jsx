@@ -6,9 +6,7 @@ import { useNavigate } from "react-router-dom";
 import Snackbar from "@mui/material/Snackbar";
 import MuiAlert from "@mui/material/Alert";
 
-
-
-function Calendar() {
+function Sceduler() {
   const navigate = useNavigate();
   const { token, logout } = useAuth();
   const [events, setEvents] = useState([]);
@@ -50,7 +48,7 @@ function Calendar() {
     let isMounted = true;
 
     axios
-      .get(`http://localhost:9000/calendar?month=${currentMonth}&year=${currentYear}`, {
+      .get(`http://localhost:9000/sceduler?month=${currentMonth}&year=${currentYear}`, {
         headers: {
           Authorization: `Bearer ${token}`
         }
@@ -58,37 +56,34 @@ function Calendar() {
       .then((res) => {
         if (isMounted) {
           const mapped = res.data.map((entry) => ({
-            id: entry.cal_id.toString(),
-            label: entry.cal_title,
-            groupLabel: "Event",
-            user: "User",
-            color: "#ff0000",
-            startHour: entry.cal_time,
-            endHour: entry.cal_time,
-            date: entry.cal_date,
+            id: entry.sced_id.toString(),
+            label: entry.sced_title,
+            groupLabel: entry.sced_event || "Termin",
+            user: "You",
+            color: "#3f51b5",
+            startHour: entry.sced_start_time,
+            endHour: entry.sced_end_time,
+            date: entry.sced_date,
             createdAt: new Date(),
             createdBy: "You",
-            description: entry.cal_description
+            description: entry.sced_description
           }));
           setEvents(mapped);
           setAlertProps((prev) => ({
             ...prev,
             open: true,
-            color: "info",
             severity: "info",
-            message: "✅ Your Calnendar is up to date",
-            showActionButton: false,
+            message: "✅ Dein Terminplan ist aktuell.",
           }));
         }
       })
       .catch((err) => {
-        console.error("Error while loading events:", err);
+        console.error("Error while loading scheduler events:", err);
         setAlertProps((prev) => ({
           ...prev,
           open: true,
-          color: "error",
           severity: "error",
-          message: "❌ Error while loading events",
+          message: "❌ Fehler beim Laden der Termine",
         }));
 
         if (
@@ -119,8 +114,8 @@ function Calendar() {
         options={schedulerOptions}
         toolbarProps={toolbarOptions}
         onEventsChange={handleEventsChange}
-        onCellClick={() => { }}
-        onTaskClick={() => { }}
+        onCellClick={() => {}}
+        onTaskClick={() => {}}
         onAlertCloseButtonClicked={() =>
           setAlertProps((prev) => ({ ...prev, open: false }))
         }
@@ -142,4 +137,4 @@ function Calendar() {
   );
 }
 
-export default Calendar;
+export default Sceduler;
