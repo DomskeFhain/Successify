@@ -88,4 +88,117 @@ router.post("/login", (req, res) => {
   );
 });
 
+// Profile
+
+router.get("/profile", auth, (req, res) => {
+  const { id } = req.user;
+
+  try {
+    db.get("SELECT id, username from users WHERE id = ?", [id], (err, user) => {
+      if (err) {
+        return res.json({ error: "Database error, " + err });
+      }
+      res.status(200).json(user);
+    });
+  } catch (err) {
+    console.error(err);
+    res
+      .status(500)
+      .json({ error: "Internal Server Error, please try again later!" });
+  }
+});
+
+// Change User
+
+router.put("/user", auth, (req, res) => {
+  const { id } = req.user;
+  const { newUsername, password, newPassword } = req.body;
+
+  try {
+    if (newUsername) {
+      db.get(
+        "SELECT * from users WHERE username = ?",
+        [newUsername],
+        (err, user) => {
+          if (err) {
+            return res.json({ error: "Database error, " + err });
+          }
+          if (user) {
+            return res
+              .status(400)
+              .json({ message: "Username already exists!" });
+          }
+
+          db.run(
+            "UPDATE users SET username = ? WHERE id = ?",
+            [newUsername, id],
+            (err) => {
+              if (err) {
+                return res.json({ error: "Database error, " + err });
+              }
+              return res.status(200).json({
+                message: `Successfully changed Username to ${newUsername}`,
+              });
+            }
+          );
+        }
+      );
+    }
+
+    if (password && newPassword) {
+      db.get("SELECT * from users WHERE id = ?", [id], async (err, user) => {
+        if (err) {
+          return res.json({ error: "Database error, " + err });
+        }
+        if (user) {
+          const match = await verifyPassword(password, user.password);
+
+          if (!match) {
+            return res
+              .status(400)
+              .json({ message: "Your password is not correct" });
+          }
+          const hashedPassword = await hashPassword(newPassword);
+          db.run(
+            "UPDATE users SET password = ? WHERE id = ?",
+            [hashedPassword, id],
+            (err) => {
+              if (err) {
+                return res.json({ error: "Database error, " + err });
+              }
+              return res
+                .status(200)
+                .json({ message: "Successfully changed password!" });
+            }
+          );
+        }
+      });
+    }
+  } catch (err) {
+    console.error(err);
+    res
+      .status(500)
+      .json({ error: "Internal Server Error, please try again later!" });
+  }
+});
+
+// Delete User
+
+router.delete("/user", auth, (req, res) => {
+  const { id } = req.user;
+  try {
+    db.run("DELETE FROM users WHERE id = ?", [id], (err) => {
+      if (err) {
+        return res.json({ error: "Database error, " + err });
+      }
+      res.status(200).json({ message: `Successfully deleted User!` });
+    });
+  } catch (err) {
+    console.error(err);
+    res
+      .status(500)
+      .json({ error: "Internal Server Error, please try again later!" });
+  }
+});
+
 module.exports = router;
