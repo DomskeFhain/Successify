@@ -7,7 +7,7 @@ function Home() {
       <img
         src="https://i.imgur.com/R12QXeF.png"
         alt="Screenshot"
-        style={{ maxWidth: '550px', height: 'auto' }}
+        style={{ maxWidth: '500px', height: 'auto' }}
       />
       <div className="hero-text">
         <h1>Willkommen bei Successify</h1>
