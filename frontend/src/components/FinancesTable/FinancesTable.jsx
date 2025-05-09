@@ -1,7 +1,6 @@
 import * as React from "react";
 import axios from "axios";
 import { useAuth } from "../../components/AuthContex/AuthContex";
-import { useNavigate } from "react-router-dom";
 import { DataGrid } from "@mui/x-data-grid";
 import { useApiErrorHandler } from "../HandleApiError/HandleApiError";
 import Paper from "@mui/material/Paper";
@@ -22,7 +21,6 @@ import { useState } from "react";
 
 export default function FinancesTable({ rows, onUpdate, categorys }) {
   const { token, logout } = useAuth();
-  const navigate = useNavigate();
   const [editData, setEditData] = useState(null);
   const [open, setOpen] = useState(false);
   const handleError = useApiErrorHandler();
@@ -65,15 +63,7 @@ export default function FinancesTable({ rows, onUpdate, categorys }) {
 
       handleClose();
     } catch (error) {
-      if (
-        error.response &&
-        (error.response.status === 401 || error.response.status === 403)
-      ) {
-        logout();
-        navigate("/login");
-      } else {
-        console.error("Error during Saving Attempt:", error);
-      }
+      handleError(error);
     }
   };
 
