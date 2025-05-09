@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import './shoppinglist.css';
 import { useAuth } from '../../components/AuthContex/AuthContex';
-import useNavigate from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 
 const ShoppingList = () => {
     const [items, setItems] = useState([]);
