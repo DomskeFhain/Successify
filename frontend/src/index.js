@@ -7,6 +7,7 @@ import Navbar from "./components/Navbar/navbar";
 import ShoppingList from "./components/Shoppinglist/shoppinglist";
 import Register from "./pages/register/register";
 import Login from "./pages/login/Login";
+import Todo from "./pages/To-Do/todo";
 import Sceduler from "./pages/sceduler/sceduler";
 import { AuthProvider } from "./components/AuthContex/AuthContex";
 import Finances from "./pages/Finances/Finances";
@@ -21,6 +22,7 @@ root.render(
           <Route path="/" element={<Home />} />
           <Route path="/register" element={<Register />} />
           <Route path="/login" element={<Login />} />
+          <Route path="/todo" element={<Todo />} />
           <Route path="/sceduler" element={<Sceduler />} />
           <Route path="/shoppinglist" element={<ShoppingList />} />
           <Route path="/finances" element={<Finances />} />
