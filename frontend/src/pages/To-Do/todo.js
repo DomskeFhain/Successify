@@ -16,7 +16,6 @@ function Todo() {
   const [newTaskName, setNewTaskName] = useState("");
   const [editTaskId, setEditTaskId] = useState(null);
   const [editTaskName, setEditTaskName] = useState("");
-  const [editDoneTask, setEditDoneTask] = useState(0);
   
 
   const axiosAuth = axios.create({
@@ -204,10 +203,10 @@ function Todo() {
         onChange={(e) => setNewTaskName(e.target.value)}
       />
       <button onClick={() => {postTask(editListId); getTask(editListId)}}>Hinzufügen</button>
-
+      <div className='tasksContainer'>
       <ul>
         {tasks.map((task) => (
-          <li key={task.taskID} style={task.done ? {textDecoration: "line-through"} : {textDecoration: "none"}}>
+          <p key={task.taskID} style={task.done ? {textDecoration: "line-through"} : {textDecoration: "none"}}>
             {task.taskName}
             <input type="checkbox" onChange={() => toggleEditDoneTask(task.taskID, task.done)} checked={task.done}/>
             <button onClick={() => {deleteTask(task.taskID); getTask(editListId)}}>Löschen</button>
@@ -218,15 +217,24 @@ function Todo() {
                 <input
                   type="text"
                   value={editTaskName}
-                  onChange={(e) => setEditTaskName(e.target.value)}
+                  onChange={(e) => setEditTaskName(e.target.value)
+                  }
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") {
+                      updateTask(task.taskID);
+                      setEditTaskId(null);
+                    }
+                  }
+                  }
                 />
                 <button onClick={() => updateTask(task.taskID)}>Speichern</button>
                 <button onClick={() => setEditTaskId(null)}>Abbrechen</button>
               </div>
             )}
-          </li>
+          </p>
         ))}
       </ul>
+      </div>
 
 
         </>
