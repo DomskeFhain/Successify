@@ -59,16 +59,21 @@ function Todo() {
     }
   };
 
-  const updateList = async () => {
-    try {
-      await axiosAuth.put(`/todolist/${editListId}`, { listName: editListName });
-      setEditListId(null);
-      setEditListName("");
-      getList();
-    } catch (error) {
-      handleError(error);
-    }
-  };
+const updateList = async () => {
+  try {
+    await axiosAuth.put(`/todolist/${editListId}`, { listName: editListName });
+
+    setLists(prevLists =>
+      prevLists.map(list =>
+        list.listID === editListId ? { ...list, listName: editListName } : list
+      )
+    );
+    setEditListName("");
+    setEditMode(false);
+  } catch (error) {
+    handleError(error);
+  }
+};
 
   const deleteList = async (listID) => {
     try {
@@ -108,26 +113,36 @@ function Todo() {
     }
   };
 
-  const updateTask = async (taskID) => {
-    try {
-      await axiosAuth.put(`/tasks/${taskID}`, { taskName: editTaskName });
-      getList();
-    } catch (error) {
-      handleError(error);
-    }
-  };
+const updateTask = async (taskID) => {
+  try {
+    await axiosAuth.put(`/tasks/${taskID}`, { taskName: editTaskName });
+    setTasks(prevTasks =>
+      prevTasks.map(task =>
+        task.taskID === taskID ? { ...task, taskName: editTaskName } : task
+      )
+    );
 
-  const toggleEditDoneTask = async (taskID, doneStatus) => {
-    try {
-      await axiosAuth.put(`/tasks/${taskID}`, { taskDone: doneStatus === 0 ? 1 : 0 });
-      getList();
-      getTask(editListId);
-    } catch (error) {
-      handleError(error);
-    }
-  };
+    setEditTaskName("");
+    setEditTaskId(null);
+  } catch (error) {
+    handleError(error);
+  }
+};
 
+const toggleEditDoneTask = async (taskID, doneStatus) => {
+  try {
+    const newStatus = doneStatus === 0 ? 1 : 0;
+    await axiosAuth.put(`/tasks/${taskID}`, { taskDone: newStatus });
 
+    setTasks(prevTasks =>
+      prevTasks.map(task =>
+        task.taskID === taskID ? { ...task, done: newStatus } : task
+      )
+    );
+  } catch (error) {
+    handleError(error);
+  }
+};
 
 // render
 
@@ -152,23 +167,22 @@ function Todo() {
   {lists.length > 0 && (
     <div className="dropdown-container">
       <select
-        onChange={(e) => {
-          const selectedId = parseInt(e.target.value);
-          const selectedList = lists.find((list) => list.listID === selectedId);
-          setEditListId(selectedList.listID);
-          setEditListName(selectedList.listName);
-          getTask(selectedId);
-        }}
-        value={editListId || ""}
-      >
-        <option value="" disabled>Liste auswählen</option>
-        {lists.map((list) => (
-          <option onChange={(e) => getTask(list.listID)} setkey={list.listID} value={list.listID}>
-            {list.listName}
-          </option>
-        ))}
-      </select>
-
+  onChange={(e) => {
+    const selectedId = parseInt(e.target.value);
+    const selectedList = lists.find((list) => list.listID === selectedId);
+    setEditListId(selectedList.listID);
+    setEditListName(selectedList.listName);
+    getTask(selectedId);
+  }}
+  value={editListId || ""}
+>
+  <option value="" disabled>Liste auswählen</option>
+  {lists.map((list) => (
+    <option key={list.listID} value={list.listID}>
+      {list.listName}
+    </option>
+  ))}
+</select>
       {editListId && (
         <>
           <div className="edit-buttons">
@@ -210,24 +224,22 @@ function Todo() {
             {task.taskName}
             <input type="checkbox" onChange={() => toggleEditDoneTask(task.taskID, task.done)} checked={task.done}/>
             <button onClick={() => {deleteTask(task.taskID); getTask(editListId)}}>Löschen</button>
-            <button onClick={() => setEditTaskId(task.taskID)}>Bearbeiten</button>
+            <button onClick={() => {
+            setEditTaskId(task.taskID);
+            setEditTaskName(task.taskName);}}>Bearbeiten</button>
 
             {editTaskId === task.taskID && (
               <div className="edit-controls">
                 <input
                   type="text"
                   value={editTaskName}
-                  onChange={(e) => setEditTaskName(e.target.value)
-                  }
-                  onKeyDown={(e) => {
-                    if (e.key === "Enter") {
-                      updateTask(task.taskID);
-                      setEditTaskId(null);
-                    }
-                  }
-                  }
+                  onChange={(e) => setEditTaskName(e.target.value)}
                 />
-                <button onClick={() => updateTask(task.taskID)}>Speichern</button>
+                <button onClick={() =>{ 
+                updateTask(editTaskId);
+                setEditTaskName("");
+                getTask(editListId);
+                setEditTaskId(null);}}>Speichern</button>
                 <button onClick={() => setEditTaskId(null)}>Abbrechen</button>
               </div>
             )}
