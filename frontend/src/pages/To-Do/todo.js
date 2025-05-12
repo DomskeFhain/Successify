@@ -3,10 +3,11 @@ import { useAuth } from '../../components/AuthContex/AuthContex';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import './todo.css';
+import { useApiErrorHandler } from "../../components/HandleApiError/HandleApiError";
 
 function Todo() {
+  const handleError = useApiErrorHandler();
   const { token, logout } = useAuth();
-  const navigate = useNavigate();
   const [lists, setLists] = useState([]);
   const [newListName, setNewListName] = useState("");
   const [editListId, setEditListId] = useState(null);
@@ -26,17 +27,6 @@ function Todo() {
   });
 
 //functions
-
-// handle error
-
-  const handleError = (error) => {
-    if (error.response && (error.response.status === 401 || error.response.status === 403)) {
-      logout();
-      navigate("/login");
-    } else {
-      console.error("Error:", error);
-    }
-  };
 
 // list routes x functions
 
