@@ -26,9 +26,11 @@ const shoppinglistRoutes = require("./routes/shoppinglist");
 app.use(shoppinglistRoutes);
 
 // To-Do
-const todolistRoutes = require("./routes/todolist");
-app.use(todolistRoutes);
+const todoRoutes = require("./routes/todolist");
+app.use(todoRoutes);
 
 app.listen(port, () => {
   console.log(`Server läuft auf Port ${port}`);
 });
+
+
