@@ -53,7 +53,7 @@ function Finances() {
   ];
 
   const handleAdd = () => {
-    setAddData({ date: new Date().toISOString().split("T")[0] });
+    setAddData({ date: new Date().toISOString().split("T")[0], note: "" });
     setOpen(true);
   };
 
@@ -233,6 +233,12 @@ function Finances() {
           {addErrorCosts && (
             <p style={{ color: "red", margin: 0 }}>{addErrorCosts}</p>
           )}
+          <TextField
+            name="note"
+            label="Note - Optional"
+            value={addData?.note ?? ""}
+            onChange={handleChange}
+          />
           <TextField
             name="date"
             label="Date"

@@ -29,16 +29,16 @@ router.get("/monthlyFinances", auth, (req, res) => {
 router.post("/finances", auth, (req, res) => {
   try {
     const { id } = req.user;
-    const { category, costs, date } = req.body;
+    const { category, costs, note, date } = req.body;
 
     if (!category || !costs || !date) {
       return res.status(400).json({ error: "Missing required fields" });
     }
 
     db.run(
-      `INSERT INTO finances (user_id, category, costs, date)
-         VALUES (?, ?, ?, ?)`,
-      [id, category, costs, date],
+      `INSERT INTO finances (user_id, category, note, costs, date)
+         VALUES (?, ?, ?, ?, ?)`,
+      [id, category, note, costs, date],
       function (err) {
         if (err) {
           console.error(err);
