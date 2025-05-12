@@ -78,10 +78,14 @@ const ShoppingList = () => {
     };
 
     const updateQuantity = async (id, newQuantity) => {
-        if (newQuantity > 0) {
+        const currentItem = items.find(item => item.id === id);
+        if (newQuantity > 0 && currentItem) {
             try {
                 await axios.put(`http://localhost:9000/shoppinglist/${id}`, {
-                    quantity: newQuantity
+                    item: currentItem.item,
+                    quantity: newQuantity,
+                    price: currentItem.price,
+                    date: currentItem.date
                 }, {
                     headers: {
                         'Authorization': `Bearer ${token}`
@@ -96,18 +100,24 @@ const ShoppingList = () => {
     };
 
     const updatePrice = async (id, newPrice) => {
-        try {
-            await axios.put(`http://localhost:9000/shoppinglist/${id}`, {
-                price: parseFloat(newPrice) || 0
-            }, {
-                headers: {
-                    'Authorization': `Bearer ${token}`
-                }
-            });
-            fetchShoppingList();
-            setError('');
-        } catch (error) {
-            handleError(error);
+        const currentItem = items.find(item => item.id === id);
+        if (currentItem) {
+            try {
+                await axios.put(`http://localhost:9000/shoppinglist/${id}`, {
+                    item: currentItem.item,
+                    quantity: currentItem.quantity,
+                    price: parseFloat(newPrice) || 0,
+                    date: currentItem.date
+                }, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+                fetchShoppingList();
+                setError('');
+            } catch (error) {
+                handleError(error);
+            }
         }
     };
 
