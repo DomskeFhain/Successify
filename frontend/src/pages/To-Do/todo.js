@@ -122,6 +122,7 @@ function Todo() {
     try {
       await axiosAuth.put(`/tasks/${taskID}`, { taskDone: doneStatus === 0 ? 1 : 0 });
       getList();
+      getTask(editListId);
     } catch (error) {
       handleError(error);
     }
@@ -175,6 +176,7 @@ function Todo() {
             <button onClick={() => setEditMode(true)}>Bearbeiten</button>
             <button onClick={() => deleteList(editListId)}>Löschen</button>
           </div>
+        
 
           {editMode && (
             <div className="edit-controls">
@@ -205,9 +207,9 @@ function Todo() {
 
       <ul>
         {tasks.map((task) => (
-          <li key={task.taskID}>
+          <li key={task.taskID} style={task.done ? {textDecoration: "line-through"} : {textDecoration: "none"}}>
             {task.taskName}
-            <input type="checkbox" onChange={() => toggleEditDoneTask(task.taskID, task.done)}/>
+            <input type="checkbox" onChange={() => toggleEditDoneTask(task.taskID, task.done)} checked={task.done}/>
             <button onClick={() => {deleteTask(task.taskID); getTask(editListId)}}>Löschen</button>
             <button onClick={() => setEditTaskId(task.taskID)}>Bearbeiten</button>
 
