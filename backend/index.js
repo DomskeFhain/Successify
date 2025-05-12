@@ -577,10 +577,10 @@ app.put("/tasks/:taskId", auth, (req, res) => {
   let query = "";
   let params = [];
   if (taskName) {
-    query = "UPDATE tasksList SET taskName = ? WHERE listId = ?";
+    query = "UPDATE tasksList SET taskName = ? WHERE listID = ?";
     params = [taskName, id];
   } else if (taskDone !== undefined) {
-    query = "UPDATE tasksList SET taskDone = ? WHERE listId = ?";
+    query = "UPDATE tasksList SET done = ? WHERE listID = ?";
     params = [taskDone, id];
   } else {
     return res.status(400).json({ message: "Nothing to update" });

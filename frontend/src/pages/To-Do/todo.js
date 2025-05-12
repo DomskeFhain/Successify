@@ -118,10 +118,9 @@ function Todo() {
     }
   };
 
-  const toggleEditDoneTask = async (taskID) => {
+  const toggleEditDoneTask = async (taskID, doneStatus) => {
     try {
-      setEditDoneTask(1)
-      await axiosAuth.put(`/tasks/${taskID}`, { taskDone: editDoneTask });
+      await axiosAuth.put(`/tasks/${taskID}`, { taskDone: doneStatus === 0 ? 1 : 0 });
       getList();
     } catch (error) {
       handleError(error);
@@ -208,7 +207,7 @@ function Todo() {
         {tasks.map((task) => (
           <li key={task.taskID}>
             {task.taskName}
-            <input type="checkbox" onChange={() => toggleEditDoneTask(task.taskID)} checked={task.taskDone}/>
+            <input type="checkbox" onChange={() => toggleEditDoneTask(task.taskID, task.done)}/>
             <button onClick={() => {deleteTask(task.taskID); getTask(editListId)}}>Löschen</button>
             <button onClick={() => setEditTaskId(task.taskID)}>Bearbeiten</button>
 
