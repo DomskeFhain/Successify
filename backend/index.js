@@ -17,9 +17,9 @@ app.use(usersRoutes);
 const finacesRoutes = require("./routes/finances");
 app.use(finacesRoutes);
 
-// Sceduler
-const scedulerRoutes = require("./routes/sceduler");
-app.use(scedulerRoutes);
+// scheduler
+const schedulerRoutes = require("./routes/scheduler");
+app.use(schedulerRoutes);
 
 // Shopping-List
 const shoppinglistRoutes = require("./routes/shoppinglist");
