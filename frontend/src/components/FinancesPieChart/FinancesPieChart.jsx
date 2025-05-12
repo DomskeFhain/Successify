@@ -27,7 +27,6 @@ const FinancesPieChart = ({ finances }) => {
     label: `Total: ${totalCosts}€`,
     value: 0,
     color: "none",
-    style: { Color: "red" },
   });
 
   return (
