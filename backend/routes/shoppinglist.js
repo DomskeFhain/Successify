@@ -30,8 +30,8 @@ router.post("/shoppinglist", auth, (req, res) => {
     const { item, quantity, price, date } = req.body;
 
     db.run(
-      "INSERT INTO shoppinglist (user_id, item, quantity, price, date) VALUES (?, ?, ?, ?, ?)",
-      [id, item, quantity, price, date],
+      "INSERT INTO shoppinglist (user_id, item, quantity, price, date, completed) VALUES (?, ?, ?, ?, ?, ?)",
+      [id, item, quantity, price, date, false],
       (err) => {
         if (err) {
           res
@@ -56,11 +56,11 @@ router.post("/shoppinglist", auth, (req, res) => {
 router.put("/shoppinglist/:id", auth, (req, res) => {
   try {
     const { id } = req.params;
-    const { item, quantity, price, date } = req.body;
+    const { item, quantity, price, date, completed } = req.body;
 
     db.run(
-      "UPDATE shoppinglist SET item = ?, quantity = ?, price = ?, date = ? WHERE id = ?",
-      [item, quantity, price, date, id],
+      "UPDATE shoppinglist SET item = ?, quantity = ?, price = ?, date = ?, completed = ? WHERE id = ?",
+      [item, quantity, price, date, completed, id],
       (err) => {
         if (err) {
           res
