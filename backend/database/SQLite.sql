@@ -1,3 +1,13 @@
 SELECT * FROM shoppinglist;
 
 ALTER TABLE shoppinglist ADD COLUMN completed BOOLEAN DEFAULT 0;
+
+CREATE TABLE shoppinglist (
+id INTEGER PRIMARY KEY AUTOINCREMENT,
+user_id INTEGER,
+item VARCHAR(150),
+quantity INTEGER,
+price REAL,
+date DATE,
+FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+);
