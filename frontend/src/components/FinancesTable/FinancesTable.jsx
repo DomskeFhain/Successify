@@ -47,6 +47,7 @@ export default function FinancesTable({ rows, onUpdate, categorys }) {
     const newData = {
       financeId: editData.id,
       newCategory: editData.category,
+      newNote: editData?.note || "",
       newCosts: editData.costs,
       newDate: editData.date,
     };
@@ -81,6 +82,7 @@ export default function FinancesTable({ rows, onUpdate, categorys }) {
 
   const columns = [
     { field: "category", headerName: "Category", width: 150 },
+    { field: "note", headerName: "Note", width: 150 },
     { field: "costs", headerName: "Expenses (€)", type: "number", width: 150 },
     { field: "date", headerName: "Date", width: 150 },
     {
@@ -196,6 +198,12 @@ export default function FinancesTable({ rows, onUpdate, categorys }) {
             label="Expanses (€)"
             type="number"
             value={editData?.costs || ""}
+            onChange={handleChange}
+          />
+          <TextField
+            name="note"
+            label="Note - Optional"
+            value={editData?.note ?? ""}
             onChange={handleChange}
           />
           <TextField

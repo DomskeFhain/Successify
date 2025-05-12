@@ -9,7 +9,7 @@ router.get("/monthlyFinances", auth, (req, res) => {
     const { startDate, endDate } = req.query;
 
     db.all(
-      "SELECT id, category, costs, date FROM finances WHERE user_id = ? AND date between ? AND ?",
+      "SELECT id, category, note, costs, date FROM finances WHERE user_id = ? AND date between ? AND ?",
       [id, startDate, endDate],
       (err, rows) => {
         if (rows.length === 0) {
@@ -63,7 +63,7 @@ router.post("/finances", auth, (req, res) => {
 router.put("/finances", auth, (req, res) => {
   try {
     const { id } = req.user;
-    const { financeId, newCategory, newCosts, newDate } = req.body;
+    const { financeId, newCategory, newNote, newCosts, newDate } = req.body;
 
     let changes = [];
     let values = [];
@@ -71,6 +71,11 @@ router.put("/finances", auth, (req, res) => {
     if (newCategory) {
       changes.push("category = ?");
       values.push(newCategory);
+    }
+
+    if (newNote !== undefined) {
+      changes.push("note = ?");
+      values.push(newNote);
     }
 
     if (newCosts) {
