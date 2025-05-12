@@ -3,6 +3,57 @@ const router = express.Router();
 const db = require("../db");
 const auth = require("../middleware/auth");
 
+router.get("/financesYears", auth, (req, res) => {
+  try {
+    const { id } = req.user;
+
+    db.all(
+      "SELECT DISTINCT strftime('%Y', date) AS years FROM finances WHERE user_id = ? ORDER BY date DESC",
+      [id],
+      (err, rows) => {
+        if (err) {
+          console.error(err);
+          return res
+            .status(500)
+            .json({ error: "Database Error, please try again later!" });
+        }
+        res.status(200).json(rows);
+      }
+    );
+  } catch (error) {
+    console.error(error);
+    res
+      .status(500)
+      .json({ error: "Internal Server Error, Please try again later!" });
+  }
+});
+
+router.get("/financesMonths", auth, (req, res) => {
+  try {
+    const { id } = req.user;
+    const { year } = req.query;
+
+    db.all(
+      "SELECT DISTINCT CAST(strftime('%m', date) AS INTEGER) AS months FROM finances WHERE strftime('%Y', date) = ? AND user_id = ? ORDER BY date;",
+      [year, id],
+      (err, rows) => {
+        if (err) {
+          console.error(err);
+          return res
+            .status(500)
+            .json({ error: "Database Error, please try again later!" });
+        }
+        res.status(200).json(rows);
+      }
+    );
+  } catch (error) {
+    console.error(error);
+    res
+      .status(500)
+      .json({ error: "Internal Server Error, Please try again later!" });
+  }
+});
+
 router.get("/monthlyFinances", auth, (req, res) => {
   try {
     const { id, username } = req.user;
