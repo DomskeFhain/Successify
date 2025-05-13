@@ -52,7 +52,6 @@ function Todo() {
 const updateList = async () => {
   try {
     await axiosAuth.put(`/todolist/${editListId}`, { listName: editListName });
-
     setLists(prevLists =>
       prevLists.map(list =>
         list.listID === editListId ? { ...list, listName: editListName } : list
@@ -65,14 +64,18 @@ const updateList = async () => {
   }
 };
 
-  const deleteList = async (listID) => {
-    try {
-      await axiosAuth.delete(`/todolist/${listID}`);
-      getList();
-    } catch (error) {
-      handleError(error);
-    }
-  };
+const deleteList = async (listID) => {
+  try {
+    await axiosAuth.delete(`/todolist/${listID}`);
+    setEditListId(null);
+    setEditListName("");
+    setTasks([]);
+    setEditMode(false);
+    getList();
+  } catch (error) {
+    handleError(error);
+  }
+};
 
 // Task Routes x Functions
 
@@ -88,7 +91,8 @@ const updateList = async () => {
   const postTask = async (listID) => {
     try {
       await axiosAuth.post(`/tasks/${listID}`, { taskName: newTaskName });
-      getList();
+      setNewTaskName("");
+      getTask(listID);
     } catch (error) {
       handleError(error);
     }
@@ -132,6 +136,11 @@ const toggleEditDoneTask = async (taskID, doneStatus) => {
   } catch (error) {
     handleError(error);
   }
+};
+
+const handleDeleteTask = async (taskID) => {
+  await deleteTask(taskID);
+  getTask(editListId);
 };
 
 // render
@@ -199,7 +208,7 @@ const toggleEditDoneTask = async (taskID, doneStatus) => {
               <button onClick={() => setEditMode(false)}>Abbrechen</button>
             </div>
           )}
-
+    <div className='tasksContainer'>  
       <input
         type="text"
         placeholder="Neuer Eintrag eingeben"
@@ -207,16 +216,17 @@ const toggleEditDoneTask = async (taskID, doneStatus) => {
         onChange={(e) => setNewTaskName(e.target.value)}
       />
       <button onClick={() => {postTask(editListId); getTask(editListId)}}>Hinzufügen</button>
-      <div className='tasksContainer'>
+      
       <ul>
         {tasks.map((task) => (
           <p key={task.taskID} style={task.done ? {textDecoration: "line-through"} : {textDecoration: "none"}}>
             {task.taskName}
             <input type="checkbox" onChange={() => toggleEditDoneTask(task.taskID, task.done)} checked={task.done}/>
-            <button onClick={() => {deleteTask(task.taskID); getTask(editListId)}}>Löschen</button>
             <button onClick={() => {
             setEditTaskId(task.taskID);
             setEditTaskName(task.taskName);}}>Bearbeiten</button>
+            <button onClick={() => handleDeleteTask(task.taskID)}>Löschen</button>
+
 
             {editTaskId === task.taskID && (
               <div className="edit-controls">

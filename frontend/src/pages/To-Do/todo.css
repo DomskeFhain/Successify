@@ -21,3 +21,13 @@
     border-radius: 8px;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
+
+.edit-buttons{
+    margin: 0.5rem auto;
+    padding: 0.5rem;
+}
+
+.edit-controls{
+    margin: 0.5rem auto;
+    padding: 0.5rem;
+}
