@@ -156,7 +156,8 @@ function SchedulerComponent() {
     <>
       <Scheduler
         locale="en"
-        events={events} // Events werden hier gesetzt
+        events={events}
+
         legacyStyle={false}
         options={{
           transitionMode: "fade",
