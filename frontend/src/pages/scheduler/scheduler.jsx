@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, use } from 'react';
 import Scheduler from "react-mui-scheduler";
 import { useAuth } from "../../components/AuthContex/AuthContex";
 import { useNavigate } from "react-router-dom";
@@ -23,6 +23,7 @@ function SchedulerComponent() {
     groupLabel: '',
     color: '#2196f3'
   });
+  const [updateScheduler, setUpdate] = useState(0);  
 
   const getCurrentMonthAndYear = () => {
     const now = new Date();
@@ -33,6 +34,10 @@ function SchedulerComponent() {
   };
 
   useEffect(() => {
+    setUpdate(prev => prev + 1);
+  }, [events]);
+
+  useEffect(() => {
     if (!token) {
       logout();
       navigate("/login");
@@ -41,29 +46,23 @@ function SchedulerComponent() {
     }
   }, [token]);
 
-  const fetchEvents = () => {
+  const fetchEvents = async () => {
     const { month, year } = getCurrentMonthAndYear();
-    axios.get(`http://localhost:9000/scheduler?month=${month}&year=${year}`, {
-      headers: { Authorization: `Bearer ${token}` }
-    })
-    .then(response => {
-      const serverEvents = response.data.map(event => ({
-        id: String(event.id),
-        label: event.label,
-        groupLabel: event.groupLabel,
-        color: event.color,
-        startHour: convertTo12HourFormat(event.startHour),
-        endHour: convertTo12HourFormat(event.endHour),
-        date: event.date,
-        createdAt: new Date(event.createdAt),
-        createdBy: event.createdBy,
-      }));
-      setEvents(serverEvents); // Events in den State setzen
-    })
-    .catch(error => {
-      console.error("Fehler beim Laden der Events:", error);
-    });
-  };
+    const date = await axios.get(`http://localhost:9000/scheduler?month=${month}&year=${year}`, { headers: { Authorization: `Bearer ${token}` } })
+
+    const serverEvents = await date.data.map(event => ({
+      id: String(event.id),
+      label: event.label,
+      groupLabel: event.groupLabel,
+      color: event.color,
+      startHour: convertTo12HourFormat(event.startHour),
+      endHour: convertTo12HourFormat(event.endHour),
+      date: event.date,
+      createdAt: new Date(event.createdAt),
+      createdBy: event.createdBy,
+    }));
+    setEvents(serverEvents);
+  }
 
   const convertTo12HourFormat = (time) => {
     const [hours, minutes] = time.split(':');
@@ -157,7 +156,7 @@ function SchedulerComponent() {
       <Scheduler
         locale="en"
         events={events}
-
+        key = {updateScheduler}
         legacyStyle={false}
         options={{
           transitionMode: "fade",
@@ -185,7 +184,7 @@ function SchedulerComponent() {
         onEventsChange={() => {}}
         onCellClick={handleCellClick}
         onTaskClick={handleEventClick}
-        onAlertCloseButtonClicked={() => {}}
+        onAlertCloseButtonClicked={() => { }}
       />
 
       <Dialog open={openDialog} onClose={handleDialogClose}>
