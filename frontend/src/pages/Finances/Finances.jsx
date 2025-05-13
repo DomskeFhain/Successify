@@ -19,14 +19,32 @@ import TextField from "@mui/material/TextField";
 function Finances() {
   const { token } = useAuth();
   const handleError = useApiErrorHandler();
+
   const [finances, setFinances] = useState(null);
   const [month, setMonth] = useState(new Date().getMonth() + 1);
   const [year, setYear] = useState(new Date().getFullYear());
+  const [availableYears, setAvailableYears] = useState([]);
+  const [availableMonths, setAvailableMonths] = useState([]);
 
   const [open, setOpen] = useState(false);
   const [addData, setAddData] = useState(null);
   const [addErrorCategory, setAddErrorCategory] = useState(null);
   const [addErrorCosts, setAddErrorCosts] = useState(null);
+
+  const MonthNames = {
+    1: "January",
+    2: "February",
+    3: "March",
+    4: "April",
+    5: "May",
+    6: "June",
+    7: "July",
+    8: "August",
+    9: "September",
+    10: "October",
+    11: "November",
+    12: "December",
+  };
 
   const financeCategories = [
     "Rent",
@@ -51,6 +69,8 @@ function Finances() {
     "Entertainment",
     "Maintenance & Repairs",
   ];
+
+  // Add Entry
 
   const handleAdd = () => {
     setAddData({ date: new Date().toISOString().split("T")[0], note: "" });
@@ -96,16 +116,25 @@ function Finances() {
     }
   };
 
-  const years = Array.from(
-    { length: 5 },
-    (_, index) => new Date().getFullYear() - index
-  );
-
+  // Load Data
+  // Monthly Finaces
   async function loadFinances() {
-    const paddedMonth = month.toString().padStart(2, "0");
-    const lastDayOfMonth = new Date(year, month, 0).getDate();
-
     try {
+      if (month === "all") {
+        const response = await axios.get(
+          `http://localhost:9000/yearlyFinances?year=${year}`,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+
+        return setFinances(response.data);
+      }
+      const paddedMonth = month.toString().padStart(2, "0");
+      const lastDayOfMonth = new Date(year, month, 0).getDate();
+
       const response = await axios.get(
         `http://localhost:9000/monthlyFinances?startDate=${year}-${paddedMonth}-01&endDate=${year}-${paddedMonth}-${lastDayOfMonth}`,
         {
@@ -115,7 +144,7 @@ function Finances() {
         }
       );
 
-      setFinances(response.data);
+      return setFinances(response.data);
     } catch (error) {
       if (error.response.status === 404) {
         setFinances(null);
@@ -124,9 +153,48 @@ function Finances() {
     }
   }
 
-  useEffect(() => {
-    loadFinances();
-  }, [month, year]);
+  // Load Available Years
+
+  async function loadAvailableYears() {
+    try {
+      const response = await axios.get(`http://localhost:9000/financesYears`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      if (response.data.length === 0) {
+        return setAvailableYears([year]);
+      }
+      const availableYearsArray = response.data.map((year) => year.years);
+      return setAvailableYears(availableYearsArray);
+    } catch (error) {
+      handleError(error);
+    }
+  }
+
+  // Load Available Months
+
+  async function loadAvailableMonths(year) {
+    try {
+      const response = await axios.get(
+        `http://localhost:9000/financesMonths?year=${year}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      if (response.data.length === 0) {
+        return setAvailableMonths([month]);
+      }
+      const availableMonthsArray = response.data.map((month) => month.months);
+      return setAvailableMonths(availableMonthsArray);
+    } catch (error) {
+      handleError(error);
+    }
+  }
 
   const handleMonthChange = (event) => {
     setMonth(event.target.value);
@@ -136,38 +204,53 @@ function Finances() {
     setYear(event.target.value);
   };
 
+  // Get available Years
+  useEffect(() => {
+    loadAvailableYears();
+  }, []);
+
+  // Get Available Months
+  useEffect(() => {
+    loadAvailableMonths(year);
+  }, [year]);
+
+  // Load Finaces Overvies
+  useEffect(() => {
+    loadFinances();
+  }, [month, year]);
+
   return (
     <>
       <div id="header">
         <div id="center">
           <h1>Finances Overview for</h1>
-          <FormControl sx={{ minWidth: 120 }}>
-            <InputLabel>Month</InputLabel>
-            <Select label="Month" value={month} onChange={handleMonthChange}>
-              <MenuItem value={1}>January</MenuItem>
-              <MenuItem value={2}>February</MenuItem>
-              <MenuItem value={3}>March</MenuItem>
-              <MenuItem value={4}>April</MenuItem>
-              <MenuItem value={5}>May</MenuItem>
-              <MenuItem value={6}>June</MenuItem>
-              <MenuItem value={7}>July</MenuItem>
-              <MenuItem value={8}>August</MenuItem>
-              <MenuItem value={9}>September</MenuItem>
-              <MenuItem value={10}>October</MenuItem>
-              <MenuItem value={11}>November</MenuItem>
-              <MenuItem value={12}>December</MenuItem>
-            </Select>
-          </FormControl>
-          <FormControl sx={{ minWidth: 120 }}>
-            <InputLabel>Year</InputLabel>
-            <Select label="Year" value={year} onChange={handleYearChange}>
-              {years.map((yearOption) => (
-                <MenuItem key={yearOption} value={yearOption}>
-                  {yearOption}
+          {availableYears.length > 0 && (
+            <FormControl sx={{ minWidth: 120 }}>
+              <InputLabel>Year</InputLabel>
+              <Select label="Year" value={year} onChange={handleYearChange}>
+                {availableYears.map((yearOption, index) => (
+                  <MenuItem key={`yearOption-${index}`} value={yearOption}>
+                    {yearOption}
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+          )}
+          {availableMonths.length > 0 && (
+            <FormControl sx={{ minWidth: 120 }}>
+              <InputLabel>Month</InputLabel>
+              <Select label="Month" value={month} onChange={handleMonthChange}>
+                <MenuItem key="all" value="all">
+                  All
                 </MenuItem>
-              ))}
-            </Select>
-          </FormControl>
+                {availableMonths.map((month, index) => (
+                  <MenuItem key={`month-${index}`} value={month}>
+                    {MonthNames[month]}
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+          )}
         </div>
         <div>
           <Button variant="contained" color="primary" onClick={handleAdd}>
