@@ -8,9 +8,12 @@ import {
   Button, TextField, InputLabel
 } from '@mui/material';
 import { Snackbar, Alert } from '@mui/material';
+import { useApiErrorHandler } from "../../components/HandleApiError/HandleApiError";
+
 
 function SchedulerComponent() {
   const { token, logout } = useAuth();
+  const handleError = useApiErrorHandler();
   const navigate = useNavigate();
   const [events, setEvents] = useState([]);
   const [openDialog, setOpenDialog] = useState(false);
@@ -43,15 +46,12 @@ function SchedulerComponent() {
   }, [events]);
 
   useEffect(() => {
-    if (!token) {
-      logout();
-      navigate("/login");
-    } else {
       fetchEvents();
-    }
-  }, [token]);
+  }, []);
 
+  
   const fetchEvents = async () => {
+  try {
     const { month, year } = getCurrentMonthAndYear();
     const date = await axios.get(`http://localhost:9000/scheduler?month=${month}&year=${year}`, { headers: { Authorization: `Bearer ${token}` } });
 
@@ -67,6 +67,10 @@ function SchedulerComponent() {
       createdBy: event.createdBy,
     }));
     setEvents(serverEvents);
+  }
+  catch (error) {
+    handleError(error);
+  }
   };
 
   const convertTo12HourFormat = (time) => {
@@ -152,6 +156,7 @@ function SchedulerComponent() {
           setAlertMessage("Fehler beim Aktualisieren.");
           setAlertSeverity("error");
           setAlertOpen(true);
+          handleError(error);
           console.error("Fehler beim Aktualisieren:", error);
         });
     } else {
@@ -167,6 +172,7 @@ function SchedulerComponent() {
           setAlertMessage("Fehler beim Erstellen.");
           setAlertSeverity("error");
           setAlertOpen(true);
+          handleError(error);
           console.error("Fehler beim Erstellen:", error);
         });
     }
@@ -184,6 +190,7 @@ function SchedulerComponent() {
           handleDialogClose();
         })
         .catch(error => {
+          handleError(error);
           console.error("Fehler beim Löschen:", error);
         });
     }
@@ -200,6 +207,7 @@ function SchedulerComponent() {
           transitionMode: "fade",
           startWeekOn: "mon",
           defaultMode: "month",
+          mode: "month",
           minWidth: 540,
           maxWidth: 540,
           minHeight: 540,
@@ -253,14 +261,14 @@ function SchedulerComponent() {
           />
           <TextField
             margin="dense"
-            label="Start Time (z.B. 08:00:00)"
+            label="Start Time (z.B. 08:00)"
             fullWidth
             value={newEventData.startHour}
             onChange={(e) => handleInputChange('startHour', e.target.value)}
           />
           <TextField
             margin="dense"
-            label="End Time (z.B. 09:30:00)"
+            label="End Time (z.B. 09:30)"
             fullWidth
             value={newEventData.endHour}
             onChange={(e) => handleInputChange('endHour', e.target.value)}
@@ -289,7 +297,7 @@ function SchedulerComponent() {
         open={alertOpen}
         autoHideDuration={1000}
         onClose={() => setAlertOpen(false)}
-        anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
       >
         <Alert onClose={() => setAlertOpen(false)} severity={alertSeverity} sx={{ width: '100%' }}>
           {alertMessage}
