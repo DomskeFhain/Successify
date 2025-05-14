@@ -1,4 +1,4 @@
-import React, { useState, useEffect, use } from 'react';
+import React, { useState, useEffect } from 'react';
 import Scheduler from "react-mui-scheduler";
 import { useAuth } from "../../components/AuthContex/AuthContex";
 import { useNavigate } from "react-router-dom";
@@ -7,6 +7,7 @@ import {
   Dialog, DialogTitle, DialogContent, DialogActions,
   Button, TextField, InputLabel
 } from '@mui/material';
+import { Snackbar, Alert } from '@mui/material';
 
 function SchedulerComponent() {
   const { token, logout } = useAuth();
@@ -23,7 +24,7 @@ function SchedulerComponent() {
     groupLabel: '',
     color: '#2196f3'
   });
-  const [updateScheduler, setUpdate] = useState(0);  
+  const [updateScheduler, setUpdate] = useState(0);
 
   const getCurrentMonthAndYear = () => {
     const now = new Date();
@@ -32,6 +33,10 @@ function SchedulerComponent() {
       year: now.getFullYear()
     };
   };
+
+  const [alertOpen, setAlertOpen] = useState(false);
+  const [alertMessage, setAlertMessage] = useState('');
+  const [alertSeverity, setAlertSeverity] = useState('success');
 
   useEffect(() => {
     setUpdate(prev => prev + 1);
@@ -48,7 +53,7 @@ function SchedulerComponent() {
 
   const fetchEvents = async () => {
     const { month, year } = getCurrentMonthAndYear();
-    const date = await axios.get(`http://localhost:9000/scheduler?month=${month}&year=${year}`, { headers: { Authorization: `Bearer ${token}` } })
+    const date = await axios.get(`http://localhost:9000/scheduler?month=${month}&year=${year}`, { headers: { Authorization: `Bearer ${token}` } });
 
     const serverEvents = await date.data.map(event => ({
       id: String(event.id),
@@ -62,7 +67,7 @@ function SchedulerComponent() {
       createdBy: event.createdBy,
     }));
     setEvents(serverEvents);
-  }
+  };
 
   const convertTo12HourFormat = (time) => {
     const [hours, minutes] = time.split(':');
@@ -118,30 +123,50 @@ function SchedulerComponent() {
   };
 
   const handleDialogSubmit = () => {
+    const { label, groupLabel, date, startHour, endHour, color } = newEventData;
+
+    if (!label || !groupLabel || !date || !startHour || !endHour || !color) {
+      setAlertMessage("Bitte fülle alle Felder aus.");
+      setAlertSeverity("warning");
+      setAlertOpen(true);
+      return;
+    }
+
     const payload = {
       ...newEventData,
       startHour: newEventData.startHour,
       endHour: newEventData.endHour,
     };
-
     const headers = { Authorization: `Bearer ${token}` };
 
     if (editingEvent && currentEventId) {
       axios.put(`http://localhost:9000/scheduler/${currentEventId}`, payload, { headers })
         .then(() => {
+          setAlertMessage("Termin erfolgreich aktualisiert.");
+          setAlertSeverity("success");
+          setAlertOpen(true);
           fetchEvents();
           handleDialogClose();
         })
         .catch(error => {
+          setAlertMessage("Fehler beim Aktualisieren.");
+          setAlertSeverity("error");
+          setAlertOpen(true);
           console.error("Fehler beim Aktualisieren:", error);
         });
     } else {
       axios.post(`http://localhost:9000/scheduler`, payload, { headers })
         .then(() => {
+          setAlertMessage("Neuer Termin erfolgreich erstellt.");
+          setAlertSeverity("success");
+          setAlertOpen(true);
           fetchEvents();
           handleDialogClose();
         })
         .catch(error => {
+          setAlertMessage("Fehler beim Erstellen.");
+          setAlertSeverity("error");
+          setAlertOpen(true);
           console.error("Fehler beim Erstellen:", error);
         });
     }
@@ -151,12 +176,25 @@ function SchedulerComponent() {
     setNewEventData(prev => ({ ...prev, [field]: value }));
   };
 
+  const handleDialogDelete = () => {
+    if (currentEventId) {
+      axios.delete(`http://localhost:9000/scheduler/${currentEventId}`, { headers: { Authorization: `Bearer ${token}` } })
+        .then(() => {
+          fetchEvents();
+          handleDialogClose();
+        })
+        .catch(error => {
+          console.error("Fehler beim Löschen:", error);
+        });
+    }
+  };
+
   return (
     <>
       <Scheduler
         locale="en"
         events={events}
-        key = {updateScheduler}
+        key={updateScheduler}
         legacyStyle={false}
         options={{
           transitionMode: "fade",
@@ -168,12 +206,12 @@ function SchedulerComponent() {
           maxHeight: 540
         }}
         alertProps={{
-          open: false,
+          open: true,
           color: "info",
           severity: "info",
           message: "🚀 Let's start with the Successify Scheduler ✅✅✅",
-          showActionButton: true,
-          showNotification: true,
+          showActionButton: false,
+          showNotification: false,
           delay: 1500
         }}
         toolbarProps={{
@@ -181,7 +219,7 @@ function SchedulerComponent() {
           showSwitchModeButtons: true,
           showDatePicker: true
         }}
-        onEventsChange={() => {}}
+        onEventsChange={() => { }}
         onCellClick={handleCellClick}
         onTaskClick={handleEventClick}
         onAlertCloseButtonClicked={() => { }}
@@ -240,8 +278,23 @@ function SchedulerComponent() {
           <Button onClick={handleDialogSubmit} variant="contained">
             {editingEvent ? "Save" : "Create"}
           </Button>
+          {editingEvent && (
+            <Button onClick={handleDialogDelete} variant="contained" color="error">
+              Delete
+            </Button>
+          )}
         </DialogActions>
       </Dialog>
+      <Snackbar
+        open={alertOpen}
+        autoHideDuration={1000}
+        onClose={() => setAlertOpen(false)}
+        anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
+      >
+        <Alert onClose={() => setAlertOpen(false)} severity={alertSeverity} sx={{ width: '100%' }}>
+          {alertMessage}
+        </Alert>
+      </Snackbar>
     </>
   );
 }
