@@ -5,6 +5,7 @@ import { useAuth } from "../../components/AuthContex/AuthContex";
 import { useApiErrorHandler } from "../../components/HandleApiError/HandleApiError";
 import FinancesTable from "../../components/FinancesTable/FinancesTable";
 import FinancesPieChart from "../../components/FinancesPieChart/FinancesPieChart";
+import FinancesPieChartIncome from "../../components/FinancesPieChart/FinancesPieChartIncome";
 import MenuItem from "@mui/material/MenuItem";
 import Select from "@mui/material/Select";
 import InputLabel from "@mui/material/InputLabel";
@@ -21,6 +22,7 @@ function Finances() {
   const handleError = useApiErrorHandler();
 
   const [finances, setFinances] = useState(null);
+  const [income, setIncome] = useState(null);
   const [month, setMonth] = useState(0);
   const [year, setYear] = useState(new Date().getFullYear());
   const [availableYears, setAvailableYears] = useState([]);
@@ -196,6 +198,44 @@ function Finances() {
     }
   }
 
+  // Monthly Income
+
+  async function loadIncome() {
+    try {
+      if (month === 0) {
+        const response = await axios.get(
+          `http://localhost:9000/yearlyFinancesIncome?year=${year}`,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+
+        return setIncome(response.data);
+      }
+      const paddedMonth = month.toString().padStart(2, "0");
+      const lastDayOfMonth = new Date(year, month, 0).getDate();
+
+      const response = await axios.get(
+        `http://localhost:9000/monthlyFinancesIncome?startDate=${year}-${paddedMonth}-01&endDate=${year}-${paddedMonth}-${lastDayOfMonth}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      return setIncome(response.data);
+    } catch (error) {
+      if (error.response.status === 404) {
+        setIncome(null);
+        loadAvailableMonths();
+        setMonth(0);
+      }
+      handleError(error);
+    }
+  }
   // Load Available Years
 
   async function loadAvailableYears() {
@@ -277,6 +317,7 @@ function Finances() {
   // Load Finaces Overvies
   useEffect(() => {
     loadFinances();
+    loadIncome();
   }, [month, year]);
 
   return (
@@ -323,6 +364,7 @@ function Finances() {
         </div>
       </div>
       <div id="content">
+        <h1 className="topic">Expanses</h1>
         <div className="left">
           {finances ? (
             <FinancesPieChart finances={finances} months={month} />
@@ -334,6 +376,31 @@ function Finances() {
           {finances ? (
             <FinancesTable
               rows={finances}
+              onUpdate={loadFinances}
+              categorys={financeCategories}
+              year={year}
+              month={month}
+              availableMonths={availableMonths}
+              availableYears={availableYears}
+              loadAvailableMonths={loadAvailableMonths}
+              loadAvailableYears={loadAvailableYears}
+            />
+          ) : (
+            <p>No Data available</p>
+          )}
+        </div>
+        <h1 className="topic">Income</h1>
+        <div className="left">
+          {income ? (
+            <FinancesPieChartIncome finances={income} months={month} />
+          ) : (
+            <p>No Data available</p>
+          )}
+        </div>
+        <div className="right">
+          {finances ? (
+            <FinancesTable
+              rows={income}
               onUpdate={loadFinances}
               categorys={financeCategories}
               year={year}
