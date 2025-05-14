@@ -21,15 +21,16 @@ function Finances() {
   const handleError = useApiErrorHandler();
 
   const [finances, setFinances] = useState(null);
-  const [month, setMonth] = useState(new Date().getMonth() + 1);
+  const [month, setMonth] = useState(0);
   const [year, setYear] = useState(new Date().getFullYear());
   const [availableYears, setAvailableYears] = useState([]);
   const [availableMonths, setAvailableMonths] = useState([]);
-
   const [open, setOpen] = useState(false);
   const [addData, setAddData] = useState(null);
   const [addErrorCategory, setAddErrorCategory] = useState(null);
   const [addErrorCosts, setAddErrorCosts] = useState(null);
+  const [addErrorDate, setAddErrorDate] = useState(null);
+  const [hasAutoSelectedMonth, setHasAutoSelectedMonth] = useState(false);
 
   const MonthNames = {
     1: "January",
@@ -73,7 +74,23 @@ function Finances() {
   // Add Entry
 
   const handleAdd = () => {
-    setAddData({ date: new Date().toISOString().split("T")[0], note: "" });
+    let dateString;
+
+    if (
+      (month === 0 || month === new Date().getMonth() + 1) &&
+      year === new Date().getFullYear()
+    ) {
+      dateString = new Date().toISOString().split("T")[0];
+    } else {
+      if (month === 0) {
+        dateString = "";
+      } else {
+        const paddedMonth = month.toString().padStart(2, "0");
+        dateString = `${year}-${paddedMonth}-01`;
+      }
+    }
+
+    setAddData({ date: dateString, note: "" });
     setOpen(true);
   };
 
@@ -82,6 +99,7 @@ function Finances() {
     setAddData(null);
     setAddErrorCosts(null);
     setAddErrorCategory(null);
+    setAddErrorDate(null);
   };
 
   const handleChange = (e) => {
@@ -100,6 +118,9 @@ function Finances() {
     if (!addData?.costs || isNaN(addData.costs)) {
       return setAddErrorCosts("Please enter a valid expense");
     }
+    if (!addData?.date) {
+      return setAddErrorDate("Please enter a Date");
+    }
 
     try {
       await axios.post(`http://localhost:9000/finances`, addData, {
@@ -110,7 +131,27 @@ function Finances() {
       });
 
       handleClose();
-      loadFinances();
+
+      const addedDate = new Date(addData.date);
+      const addedMonth = addedDate.getMonth() + 1;
+      const addedYear = addedDate.getFullYear();
+
+      if (month === 0 || (month === addedMonth && year === addedYear)) {
+        loadFinances();
+      }
+
+      if (!availableYears.includes(addedYear)) {
+        loadAvailableYears();
+      }
+
+      if (addedYear === year && !availableMonths.includes(addedMonth)) {
+        loadAvailableMonths();
+      } else {
+        loadAvailableMonths();
+      }
+      if (addedYear !== year && availableMonths.includes(addedMonth)) {
+        loadFinances();
+      }
     } catch (error) {
       handleError(error);
     }
@@ -120,7 +161,7 @@ function Finances() {
   // Monthly Finaces
   async function loadFinances() {
     try {
-      if (month === "all") {
+      if (month === 0) {
         const response = await axios.get(
           `http://localhost:9000/yearlyFinances?year=${year}`,
           {
@@ -148,6 +189,8 @@ function Finances() {
     } catch (error) {
       if (error.response.status === 404) {
         setFinances(null);
+        loadAvailableMonths();
+        setMonth(0);
       }
       handleError(error);
     }
@@ -175,7 +218,7 @@ function Finances() {
 
   // Load Available Months
 
-  async function loadAvailableMonths(year) {
+  async function loadAvailableMonths() {
     try {
       const response = await axios.get(
         `http://localhost:9000/financesMonths?year=${year}`,
@@ -187,9 +230,11 @@ function Finances() {
       );
 
       if (response.data.length === 0) {
-        return setAvailableMonths([month]);
+        return setAvailableMonths([]);
       }
-      const availableMonthsArray = response.data.map((month) => month.months);
+      const availableMonthsArray = response.data.map((month) =>
+        Number(month.months)
+      );
       return setAvailableMonths(availableMonthsArray);
     } catch (error) {
       handleError(error);
@@ -197,11 +242,12 @@ function Finances() {
   }
 
   const handleMonthChange = (event) => {
-    setMonth(event.target.value);
+    setMonth(Number(event.target.value));
   };
 
   const handleYearChange = (event) => {
     setYear(event.target.value);
+    setMonth(0);
   };
 
   // Get available Years
@@ -211,8 +257,22 @@ function Finances() {
 
   // Get Available Months
   useEffect(() => {
-    loadAvailableMonths(year);
+    loadAvailableMonths();
   }, [year]);
+
+  //
+
+  useEffect(() => {
+    const currentMonth = new Date().getMonth() + 1;
+    if (
+      !hasAutoSelectedMonth &&
+      month === 0 &&
+      availableMonths.includes(currentMonth)
+    ) {
+      setMonth(currentMonth);
+      setHasAutoSelectedMonth(true);
+    }
+  }, [availableMonths, month, hasAutoSelectedMonth]);
 
   // Load Finaces Overvies
   useEffect(() => {
@@ -239,8 +299,12 @@ function Finances() {
           {availableMonths.length > 0 && (
             <FormControl sx={{ minWidth: 120 }}>
               <InputLabel>Month</InputLabel>
-              <Select label="Month" value={month} onChange={handleMonthChange}>
-                <MenuItem key="all" value="all">
+              <Select
+                label="Month"
+                value={availableMonths.includes(month) ? month : 0}
+                onChange={handleMonthChange}
+              >
+                <MenuItem key="all" value={0}>
                   All
                 </MenuItem>
                 {availableMonths.map((month, index) => (
@@ -261,7 +325,7 @@ function Finances() {
       <div id="content">
         <div className="left">
           {finances ? (
-            <FinancesPieChart finances={finances} />
+            <FinancesPieChart finances={finances} months={month} />
           ) : (
             <p>No Data available</p>
           )}
@@ -272,6 +336,12 @@ function Finances() {
               rows={finances}
               onUpdate={loadFinances}
               categorys={financeCategories}
+              year={year}
+              month={month}
+              availableMonths={availableMonths}
+              availableYears={availableYears}
+              loadAvailableMonths={loadAvailableMonths}
+              loadAvailableYears={loadAvailableYears}
             />
           ) : (
             <p>No Data available</p>
@@ -330,6 +400,9 @@ function Finances() {
             onChange={handleChange}
             InputLabelProps={{ shrink: true }}
           />
+          {addErrorDate && (
+            <p style={{ color: "red", margin: 0 }}>{addErrorDate}</p>
+          )}
         </DialogContent>
         <DialogActions>
           <Button onClick={handleClose} color="primary">

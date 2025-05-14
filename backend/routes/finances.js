@@ -60,7 +60,7 @@ router.get("/monthlyFinances", auth, (req, res) => {
     const { startDate, endDate } = req.query;
 
     db.all(
-      "SELECT id, category, note, costs, date FROM finances WHERE user_id = ? AND date between ? AND ?",
+      "SELECT id, category, note, costs, date FROM finances WHERE user_id = ? AND date between ? AND ? ORDER BY date",
       [id, startDate, endDate],
       (err, rows) => {
         if (rows.length === 0) {
@@ -83,7 +83,7 @@ router.get("/yearlyFinances", auth, (req, res) => {
     const { year } = req.query;
 
     db.all(
-      "SELECT id, category, note, costs, date FROM finances WHERE user_id = ? AND strftime('%Y', date) = ?",
+      "SELECT id, category, note, costs, date FROM finances WHERE user_id = ? AND strftime('%Y', date) = ? ORDER BY date",
       [id, year],
       (err, rows) => {
         if (rows.length === 0) {
