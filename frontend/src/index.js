@@ -26,6 +26,7 @@ root.render(
           <Route path="/profile" element={<Profile />} />
           <Route path="/login" element={<Login />} />
           <Route path="/todo" element={<Todo />} />
+          <Route path="/finances" element={<Finances />} />
           <Route path="/sceduler" element={<Sceduler />} />
           <Route path="/shoppinglist" element={<ShoppingList />} />
           <Route path="/pomodoro" element={<Timer />} />
