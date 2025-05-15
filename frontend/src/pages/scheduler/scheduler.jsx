@@ -37,6 +37,7 @@ function SchedulerComponent() {
     };
   };
 
+  const [currentDate, setCurrentDate] = useState(getCurrentMonthAndYear());
   const [alertOpen, setAlertOpen] = useState(false);
   const [alertMessage, setAlertMessage] = useState('');
   const [alertSeverity, setAlertSeverity] = useState('success');
@@ -46,31 +47,32 @@ function SchedulerComponent() {
   }, [events]);
 
   useEffect(() => {
-      fetchEvents();
+    fetchEvents();
   }, []);
 
-  
-  const fetchEvents = async () => {
-  try {
-    const { month, year } = getCurrentMonthAndYear();
-    const date = await axios.get(`http://localhost:9000/scheduler?month=${month}&year=${year}`, { headers: { Authorization: `Bearer ${token}` } });
 
-    const serverEvents = await date.data.map(event => ({
-      id: String(event.id),
-      label: event.label,
-      groupLabel: event.groupLabel,
-      color: event.color,
-      startHour: convertTo12HourFormat(event.startHour),
-      endHour: convertTo12HourFormat(event.endHour),
-      date: event.date,
-      createdAt: new Date(event.createdAt),
-      createdBy: event.createdBy,
-    }));
-    setEvents(serverEvents);
-  }
-  catch (error) {
-    handleError(error);
-  }
+  const fetchEvents = async (month = currentDate.month, year = currentDate.year) => {
+    try {
+      const response = await axios.get(
+        `http://localhost:9000/scheduler?month=${month}&year=${year}`,
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+
+      const serverEvents = response.data.map(event => ({
+        id: String(event.id),
+        label: event.label,
+        groupLabel: event.groupLabel,
+        color: event.color,
+        startHour: convertTo12HourFormat(event.startHour),
+        endHour: convertTo12HourFormat(event.endHour),
+        date: event.date,
+        createdAt: new Date(event.createdAt),
+        createdBy: event.createdBy,
+      }));
+      setEvents(serverEvents);
+    } catch (error) {
+      handleError(error);
+    }
   };
 
   const convertTo12HourFormat = (time) => {
@@ -228,6 +230,12 @@ function SchedulerComponent() {
           showDatePicker: true
         }}
         onEventsChange={() => { }}
+        onDateChange={(newDate) => {
+          const newMonth = String(newDate.getMonth() + 1).padStart(2, '0');
+          const newYear = newDate.getFullYear();
+          setCurrentDate({ month: newMonth, year: newYear });
+          fetchEvents(newMonth, newYear);
+        }}
         onCellClick={handleCellClick}
         onTaskClick={handleEventClick}
         onAlertCloseButtonClicked={() => { }}
