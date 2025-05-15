@@ -50,3 +50,19 @@ h1 {
     justify-content: center;
     text-align: center;
 }
+
+.confirm-box {
+    background-color: #fff4f4;
+    border: 1px solid #ffcccc;
+    padding: 16px;
+    margin-top: 12px;
+    border-radius: 8px;
+    text-align: center;
+}
+
+.confirm-buttons {
+    display: flex;
+    justify-content: center;
+    gap: 12px;
+    margin-top: 12px;
+}
