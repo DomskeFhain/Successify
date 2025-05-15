@@ -29,6 +29,7 @@ function SchedulerComponent() {
   });
   const [updateScheduler, setUpdate] = useState(0);
 
+
   const getCurrentMonthAndYear = () => {
     const now = new Date();
     return {
@@ -41,6 +42,7 @@ function SchedulerComponent() {
   const [alertOpen, setAlertOpen] = useState(false);
   const [alertMessage, setAlertMessage] = useState('');
   const [alertSeverity, setAlertSeverity] = useState('success');
+  const [schedulerMode, setSchedulerMode] = useState('month');
 
   useEffect(() => {
     setUpdate(prev => prev + 1);
@@ -57,7 +59,7 @@ function SchedulerComponent() {
         `http://localhost:9000/scheduler?month=${month}&year=${year}`,
         { headers: { Authorization: `Bearer ${token}` } }
       );
-
+      console.log(response.data)
       const serverEvents = response.data.map(event => ({
         id: String(event.id),
         label: event.label,
@@ -209,7 +211,7 @@ function SchedulerComponent() {
           transitionMode: "fade",
           startWeekOn: "mon",
           defaultMode: "month",
-          mode: "month",
+          mode: schedulerMode,
           minWidth: 540,
           maxWidth: 540,
           minHeight: 540,
@@ -235,6 +237,10 @@ function SchedulerComponent() {
           const newYear = newDate.getFullYear();
           setCurrentDate({ month: newMonth, year: newYear });
           fetchEvents(newMonth, newYear);
+        }}
+        onModechange={(mode) => {
+          console.log("Mode ändert sich zu:", mode)
+          setSchedulerMode(mode)
         }}
         onCellClick={handleCellClick}
         onTaskClick={handleEventClick}
