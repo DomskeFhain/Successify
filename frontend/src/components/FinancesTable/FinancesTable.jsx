@@ -19,8 +19,18 @@ import InputLabel from "@mui/material/InputLabel";
 import MenuItem from "@mui/material/MenuItem";
 import { useState } from "react";
 
-export default function FinancesTable({ rows, onUpdate, categorys }) {
-  const { token, logout } = useAuth();
+export default function FinancesTable({
+  rows,
+  onUpdate,
+  categorys,
+  year,
+  month,
+  availableMonths,
+  availableYears,
+  loadAvailableMonths,
+  loadAvailableYears,
+}) {
+  const { token } = useAuth();
   const [editData, setEditData] = useState(null);
   const [open, setOpen] = useState(false);
   const handleError = useApiErrorHandler();
@@ -60,8 +70,27 @@ export default function FinancesTable({ rows, onUpdate, categorys }) {
         },
       });
 
-      if (onUpdate) onUpdate();
+      const updatedDate = new Date(editData.date);
+      const updatedYear = updatedDate.getFullYear();
+      const updatedMonth = updatedDate.getMonth() + 1;
 
+      if (!availableYears.includes(updatedYear)) {
+        await loadAvailableYears();
+      }
+
+      if (year === updatedYear && !availableMonths.includes(updatedMonth)) {
+        await loadAvailableMonths();
+      }
+
+      const isSameYear = updatedYear === year;
+      const isSameMonth = updatedMonth === month;
+      const isAllSelected = month === 0;
+
+      if (isAllSelected || (isSameYear && isSameMonth)) {
+        await onUpdate();
+      }
+
+      if (onUpdate) onUpdate();
       handleClose();
     } catch (error) {
       handleError(error);

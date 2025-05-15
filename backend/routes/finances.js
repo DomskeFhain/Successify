@@ -60,8 +60,31 @@ router.get("/monthlyFinances", auth, (req, res) => {
     const { startDate, endDate } = req.query;
 
     db.all(
-      "SELECT id, category, note, costs, date FROM finances WHERE user_id = ? AND date between ? AND ?",
+      "SELECT id, category, note, costs, date FROM finances WHERE user_id = ? AND date between ? AND ? ORDER BY date",
       [id, startDate, endDate],
+      (err, rows) => {
+        if (rows.length === 0) {
+          return res.status(404).send("No Data Found");
+        }
+        res.status(200).json(rows);
+      }
+    );
+  } catch (error) {
+    console.error(error);
+    res
+      .status(500)
+      .json({ error: "Internal Server Error, Please try again later!" });
+  }
+});
+
+router.get("/yearlyFinances", auth, (req, res) => {
+  try {
+    const { id } = req.user;
+    const { year } = req.query;
+
+    db.all(
+      "SELECT id, category, note, costs, date FROM finances WHERE user_id = ? AND strftime('%Y', date) = ? ORDER BY date",
+      [id, year],
       (err, rows) => {
         if (rows.length === 0) {
           return res.status(404).send("No Data Found");

@@ -12,6 +12,7 @@ import Sceduler from "./pages/sceduler/sceduler";
 import { AuthProvider } from "./components/AuthContex/AuthContex";
 import Finances from "./pages/Finances/Finances";
 import Timer from "./pages/Pomodoro/Timer";
+import Profile from './components/Profile/profile';
 
 const root = ReactDOM.createRoot(document.getElementById("root"));
 root.render(
@@ -22,6 +23,7 @@ root.render(
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/register" element={<Register />} />
+          <Route path="/profile" element={<Profile />} />
           <Route path="/login" element={<Login />} />
           <Route path="/todo" element={<Todo />} />
           <Route path="/sceduler" element={<Sceduler />} />
