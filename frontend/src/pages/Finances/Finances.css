@@ -13,9 +13,14 @@
   #content {
     padding-top: 0.5rem;
     display: grid;
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: 1fr 1fr ;
     height: min-content;
     gap: 0.5rem;
+  }
+
+  .topic {
+    text-align: center;
+    grid-column: 1 / -1;
   }
   
   .left, .right {
@@ -37,3 +42,7 @@
     text-align: center;
   }
   
+  .addButtons {
+    display: flex;
+    gap: 1rem;
+  }

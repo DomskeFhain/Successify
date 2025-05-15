@@ -19,7 +19,7 @@ import InputLabel from "@mui/material/InputLabel";
 import MenuItem from "@mui/material/MenuItem";
 import { useState } from "react";
 
-export default function FinancesTable({
+export default function FinancesTableIncome({
   rows,
   onUpdate,
   categorys,
@@ -59,12 +59,13 @@ export default function FinancesTable({
       financeId: editData.id,
       newCategory: editData.category,
       newNote: editData?.note || "",
-      newCosts: editData.costs,
+      newIncome: editData.income,
       newDate: editData.date,
     };
 
     try {
-      await axios.put(`http://localhost:9000/finances`, newData, {
+      console.log(newData);
+      await axios.put(`http://localhost:9000/financesIncome`, newData, {
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
@@ -100,7 +101,7 @@ export default function FinancesTable({
 
   const handleDelete = async (id) => {
     try {
-      await axios.delete(`http://localhost:9000/finances/${id}`, {
+      await axios.delete(`http://localhost:9000/financesIncome/${id}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
 
@@ -113,7 +114,7 @@ export default function FinancesTable({
   const columns = [
     { field: "category", headerName: "Category", width: 150 },
     { field: "note", headerName: "Note", width: 150 },
-    { field: "costs", headerName: "Expenses (€)", type: "number", width: 150 },
+    { field: "income", headerName: "Income (€)", type: "number", width: 150 },
     { field: "date", headerName: "Date", width: 150 },
     {
       field: "edit",
@@ -153,7 +154,7 @@ export default function FinancesTable({
   const filledRows = [
     ...rows,
     ...Array.from({ length: Math.max(0, MIN_ROWS - rows.length) }, (_, i) => ({
-      id: `empty-${i}`,
+      id: `empty-${i}`, // Wichtig: Eindeutige ID
       category: "",
       note: "",
       income: "",
@@ -166,7 +167,7 @@ export default function FinancesTable({
     <>
       <Paper>
         <DataGrid
-          rows={rows}
+          rows={filledRows}
           columns={columns}
           initialState={{
             pagination: { paginationModel: { page: 0, pageSize } },
@@ -241,10 +242,10 @@ export default function FinancesTable({
             </Select>
           </FormControl>
           <TextField
-            name="costs"
-            label="Expanses (€)"
+            name="income"
+            label="Income (€)"
             type="number"
-            value={editData?.costs || ""}
+            value={editData?.income || ""}
             onChange={handleChange}
           />
           <TextField

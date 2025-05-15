@@ -14,8 +14,14 @@ const usersRoutes = require("./routes/users");
 app.use(usersRoutes);
 
 // Finances
-const finacesRoutes = require("./routes/finances");
-app.use(finacesRoutes);
+// Expanses
+const financesRoutes = require("./routes/finances");
+app.use(financesRoutes);
+
+// Income
+
+const financesIncomeRoutes = require("./routes/financesIncome");
+app.use(financesIncomeRoutes);
 
 // Sceduler
 const scedulerRoutes = require("./routes/sceduler");
@@ -32,5 +38,3 @@ app.use(todoRoutes);
 app.listen(port, () => {
   console.log(`Server läuft auf Port ${port}`);
 });
-
-
