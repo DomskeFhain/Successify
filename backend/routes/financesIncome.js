@@ -5,57 +5,6 @@ const auth = require("../middleware/auth");
 
 // Income
 
-router.get("/financesIncomeYears", auth, (req, res) => {
-  try {
-    const { id } = req.user;
-
-    db.all(
-      "SELECT DISTINCT strftime('%Y', date) AS years FROM financesIncome WHERE user_id = ? ORDER BY date DESC",
-      [id],
-      (err, rows) => {
-        if (err) {
-          console.error(err);
-          return res
-            .status(500)
-            .json({ error: "Database Error, please try again later!" });
-        }
-        res.status(200).json(rows);
-      }
-    );
-  } catch (error) {
-    console.error(error);
-    res
-      .status(500)
-      .json({ error: "Internal Server Error, Please try again later!" });
-  }
-});
-
-router.get("/financesIncomeMonths", auth, (req, res) => {
-  try {
-    const { id } = req.user;
-    const { year } = req.query;
-
-    db.all(
-      "SELECT DISTINCT CAST(strftime('%m', date) AS INTEGER) AS months FROM financesIncome WHERE strftime('%Y', date) = ? AND user_id = ? ORDER BY date;",
-      [year, id],
-      (err, rows) => {
-        if (err) {
-          console.error(err);
-          return res
-            .status(500)
-            .json({ error: "Database Error, please try again later!" });
-        }
-        res.status(200).json(rows);
-      }
-    );
-  } catch (error) {
-    console.error(error);
-    res
-      .status(500)
-      .json({ error: "Internal Server Error, Please try again later!" });
-  }
-});
-
 router.get("/monthlyFinancesIncome", auth, (req, res) => {
   try {
     const { id, username } = req.user;
@@ -105,16 +54,16 @@ router.get("/yearlyFinancesIncome", auth, (req, res) => {
 router.post("/financesIncome", auth, (req, res) => {
   try {
     const { id } = req.user;
-    const { category, costs, note, date } = req.body;
+    const { category, income, note, date } = req.body;
 
-    if (!category || !costs || !date) {
+    if (!category || !income || !date) {
       return res.status(400).json({ error: "Missing required fields" });
     }
 
     db.run(
-      `INSERT INTO financesIncome (user_id, category, note, costs, date)
+      `INSERT INTO financesIncome (user_id, category, note, income, date)
          VALUES (?, ?, ?, ?, ?)`,
-      [id, category, note, costs, date],
+      [id, category, note, income, date],
       function (err) {
         if (err) {
           console.error(err);
@@ -139,7 +88,7 @@ router.post("/financesIncome", auth, (req, res) => {
 router.put("/financesIncome", auth, (req, res) => {
   try {
     const { id } = req.user;
-    const { financeId, newCategory, newNote, newCosts, newDate } = req.body;
+    const { financeId, newCategory, newNote, newIncome, newDate } = req.body;
 
     let changes = [];
     let values = [];
@@ -154,9 +103,9 @@ router.put("/financesIncome", auth, (req, res) => {
       values.push(newNote);
     }
 
-    if (newCosts) {
-      changes.push("costs = ?");
-      values.push(newCosts);
+    if (newIncome) {
+      changes.push("income = ?");
+      values.push(newIncome);
     }
 
     if (newDate) {

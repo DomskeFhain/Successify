@@ -10,8 +10,12 @@ router.get("/financesYears", auth, (req, res) => {
     const { id } = req.user;
 
     db.all(
-      "SELECT DISTINCT strftime('%Y', date) AS years FROM finances WHERE user_id = ? ORDER BY date DESC",
-      [id],
+      `SELECT DISTINCT years FROM (
+      SELECT strftime('%Y', date) AS years FROM finances WHERE user_id = ?
+      UNION
+      SELECT strftime('%Y', date) AS years FROM financesIncome WHERE user_id = ?)
+      ORDER BY years DESC;`,
+      [id, id],
       (err, rows) => {
         if (err) {
           console.error(err);
@@ -36,8 +40,17 @@ router.get("/financesMonths", auth, (req, res) => {
     const { year } = req.query;
 
     db.all(
-      "SELECT DISTINCT CAST(strftime('%m', date) AS INTEGER) AS months FROM finances WHERE strftime('%Y', date) = ? AND user_id = ? ORDER BY date;",
-      [year, id],
+      `SELECT DISTINCT months FROM (
+        SELECT CAST(strftime('%m', date) AS INTEGER) AS months
+        FROM finances
+        WHERE strftime('%Y', date) = ? AND user_id = ?
+        UNION
+        SELECT CAST(strftime('%m', date) AS INTEGER) AS months
+        FROM financesIncome
+        WHERE strftime('%Y', date) = ? AND user_id = ?
+      )
+      ORDER BY months;`,
+      [year, id, year, id],
       (err, rows) => {
         if (err) {
           console.error(err);

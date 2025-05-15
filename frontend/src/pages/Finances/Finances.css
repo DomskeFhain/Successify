@@ -42,3 +42,7 @@
     text-align: center;
   }
   
+  .addButtons {
+    display: flex;
+    gap: 1rem;
+  }
