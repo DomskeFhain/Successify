@@ -1,19 +1,12 @@
-import React from 'react'
-import { Button } from '@mui/material'
-import SliderWork from './SliderWork'
-import ButtonStartWork from './ButtonStartWork'
-import DisplayTimeWork from './DisplayTimeWork'
-
+import Countdown from "./Countdown";
+import "./Timer.css";
 
 function Timer() {
   return (
-    <>
-    <DisplayTimeWork />
-    <SliderWork />
-    <ButtonStartWork />
-    
-    </>
-  )
+    <div className="App">
+      <Countdown />
+    </div>
+  );
 }
 
-export default Timer
+export default Timer;
