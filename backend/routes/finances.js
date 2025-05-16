@@ -69,21 +69,78 @@ router.get("/financesMonths", auth, (req, res) => {
   }
 });
 
+router.get("/financesCategorys", auth, (req, res) => {
+  try {
+    const { id } = req.user;
+    const { year, startDate, endDate } = req.query;
+
+    let query = `SELECT DISTINCT category FROM finances
+      WHERE user_id = ?`;
+
+    const values = [id];
+
+    if (year) {
+      query += ` AND strftime('%Y', date) = ?`;
+      values.push(year);
+    }
+
+    if (startDate && endDate) {
+      query += ` AND date BETWEEN ? AND ?`;
+      values.push(startDate, endDate);
+    }
+
+    query += ` ORDER BY category;`;
+
+    db.all(query, values, (err, rows) => {
+      if (err) {
+        console.error(err);
+        return res
+          .status(500)
+          .json({ error: "Database Error, please try again later!" });
+      }
+      res.status(200).json(rows);
+    });
+  } catch (error) {
+    console.error(error);
+    res
+      .status(500)
+      .json({ error: "Internal Server Error, Please try again later!" });
+  }
+});
+
 router.get("/monthlyFinances", auth, (req, res) => {
   try {
     const { id, username } = req.user;
-    const { startDate, endDate } = req.query;
+    const { startDate, endDate, category } = req.query;
 
-    db.all(
-      "SELECT id, category, note, costs, date FROM finances WHERE user_id = ? AND date between ? AND ? ORDER BY date",
-      [id, startDate, endDate],
-      (err, rows) => {
-        if (rows.length === 0) {
-          return res.status(404).send("No Data Found");
-        }
-        res.status(200).json(rows);
+    let query = `
+                SELECT id, category, note, costs, date
+                FROM finances
+                WHERE user_id = ?
+                AND date BETWEEN ? AND ?
+                `;
+
+    const values = [id, startDate, endDate];
+
+    if (category) {
+      query += ` AND category = ?`;
+      values.push(category);
+    }
+
+    query += ` ORDER BY date`;
+
+    db.all(query, values, (err, rows) => {
+      if (err) {
+        console.error(err);
+        return res.status(500).send("Database error");
       }
-    );
+
+      if (rows.length === 0) {
+        return res.status(404).send("No Data Found");
+      }
+
+      res.status(200).json(rows);
+    });
   } catch (error) {
     console.error(error);
     res
@@ -95,18 +152,34 @@ router.get("/monthlyFinances", auth, (req, res) => {
 router.get("/yearlyFinances", auth, (req, res) => {
   try {
     const { id } = req.user;
-    const { year } = req.query;
+    const { year, category } = req.query;
 
-    db.all(
-      "SELECT id, category, note, costs, date FROM finances WHERE user_id = ? AND strftime('%Y', date) = ? ORDER BY date",
-      [id, year],
-      (err, rows) => {
-        if (rows.length === 0) {
-          return res.status(404).send("No Data Found");
-        }
-        res.status(200).json(rows);
+    let query = `
+                SELECT id, category, note, costs, date
+                FROM finances
+                WHERE user_id = ?
+                AND strftime('%Y', date) = ?
+                `;
+
+    const values = [id, year];
+
+    if (category) {
+      query += ` AND category = ?`;
+      values.push(category);
+    }
+
+    query += ` ORDER BY date`;
+
+    db.all(query, values, (err, rows) => {
+      if (err) {
+        console.error(err);
+        return res.status(500).send("Database error");
       }
-    );
+      if (rows.length === 0) {
+        return res.status(404).send("No Data Found");
+      }
+      res.status(200).json(rows);
+    });
   } catch (error) {
     console.error(error);
     res
