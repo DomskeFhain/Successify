@@ -158,6 +158,7 @@ const handleDeleteTask = async (taskID) => {
       placeholder="Neue Liste eingeben"
       value={newListName}
       onChange={(e) => setNewListName(e.target.value)}
+      onKeyDown={(e) => e.key === "Enter" && postList()}
     />
     <button onClick={postList}>Hinzufügen</button>
   </div>
@@ -213,6 +214,7 @@ const handleDeleteTask = async (taskID) => {
         placeholder="Neuer Eintrag eingeben"
         value={newTaskName}
         onChange={(e) => setNewTaskName(e.target.value)}
+        onKeyDown={(e) => e.key === "Enter" && postTask(editListId) && getTask(editListId)}
       />
       <button onClick={() => {postTask(editListId); getTask(editListId)}}>Hinzufügen</button>
       
