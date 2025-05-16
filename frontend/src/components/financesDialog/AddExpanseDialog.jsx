@@ -43,15 +43,16 @@ function AddExpenseDialog({
 
   useEffect(() => {
     if (!open) return;
+    const YearToday = new Date().getFullYear();
 
     let date;
 
     if (year === currentYear && month === currentMonth) {
       date = new Date();
     } else if (month === 0) {
-      date = new Date(year, 1);
+      date = new Date(year === "All" ? YearToday : year, 1);
     } else {
-      date = new Date(year, month);
+      date = new Date(year === "All" ? YearToday : year, month);
     }
 
     const formatted = date.toISOString().split("T")[0];

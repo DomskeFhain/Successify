@@ -173,7 +173,7 @@ export default function FinancesTable({
     <>
       <Paper>
         <DataGrid
-          rows={rows}
+          rows={filledRows}
           columns={columns}
           initialState={{
             pagination: { paginationModel: { page: 0, pageSize } },
