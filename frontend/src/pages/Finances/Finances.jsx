@@ -29,6 +29,11 @@ function Finances() {
   const [openIncome, setOpenIncome] = useState(false);
   const [hasAutoSelectedMonth, setHasAutoSelectedMonth] = useState(false);
   const [profit, setProfit] = useState(0);
+  const [availableExpanseCategorys, setAvailableExpanseCategorys] = useState(
+    []
+  );
+  const [filterCategory, setFilterCategory] = useState("");
+  const [filtering, setFiltering] = useState(false);
 
   const MonthNames = {
     1: "January",
@@ -98,28 +103,33 @@ function Finances() {
   async function loadFinances() {
     try {
       if (month === 0) {
-        const response = await axios.get(
-          `http://localhost:9000/yearlyFinances?year=${year}`,
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          }
-        );
+        let query = `http://localhost:9000/yearlyFinances?year=${year}`;
+
+        if (filterCategory) {
+          query += `&category=${filterCategory}`;
+        }
+        const response = await axios.get(query, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
 
         return setFinances(response.data);
       }
       const paddedMonth = month.toString().padStart(2, "0");
       const lastDayOfMonth = new Date(year, month, 0).getDate();
 
-      const response = await axios.get(
-        `http://localhost:9000/monthlyFinances?startDate=${year}-${paddedMonth}-01&endDate=${year}-${paddedMonth}-${lastDayOfMonth}`,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
+      let query = `http://localhost:9000/monthlyFinances?startDate=${year}-${paddedMonth}-01&endDate=${year}-${paddedMonth}-${lastDayOfMonth}`;
+
+      if (filterCategory) {
+        query += `&category=${filterCategory}`;
+      }
+
+      const response = await axios.get(query, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
       return setFinances(response.data);
     } catch (error) {
       if (error.response.status === 404) {
@@ -214,6 +224,45 @@ function Finances() {
     }
   }
 
+  // load available ExpanseCategorys
+
+  async function loadAvailableExpansesCategorys() {
+    try {
+      let query;
+      if (month === 0) {
+        query = `http://localhost:9000/financesCategorys?year=${year}`;
+      } else {
+        const paddedMonth = month.toString().padStart(2, "0");
+        const lastDayOfMonth = new Date(year, month, 0).getDate();
+
+        query = `http://localhost:9000/financesCategorys?startDate=${year}-${paddedMonth}-01&endDate=${year}-${paddedMonth}-${lastDayOfMonth}`;
+      }
+
+      const response = await axios.get(query, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      if (response.data.length === 0) {
+        return setAvailableExpanseCategorys([]);
+      }
+      const availableExpanseCategorysArray = response.data.map(
+        (category) => category.category
+      );
+
+      if (
+        filterCategory !== "" &&
+        !availableExpanseCategorysArray.includes(filterCategory)
+      ) {
+        availableExpanseCategorysArray.push(filterCategory);
+      }
+      return setAvailableExpanseCategorys(availableExpanseCategorysArray);
+    } catch (error) {
+      handleError(error);
+    }
+  }
+
   const handleMonthChange = (event) => {
     setMonth(Number(event.target.value));
   };
@@ -221,6 +270,15 @@ function Finances() {
   const handleYearChange = (event) => {
     setYear(event.target.value);
     setMonth(0);
+  };
+
+  const handleFilterCategoryChange = (event) => {
+    setFilterCategory(event.target.value);
+    if (event.target.value === "") {
+      setFiltering(false);
+    } else {
+      setFiltering(true);
+    }
   };
 
   // Get available Years
@@ -233,7 +291,13 @@ function Finances() {
     loadAvailableMonths();
   }, [year]);
 
-  //
+  // Get Available Categorys
+
+  useEffect(() => {
+    loadAvailableExpansesCategorys();
+  }, [month, year, filterCategory]);
+
+  // Auto Select current Month if available
 
   useEffect(() => {
     const currentMonth = new Date().getMonth() + 1;
@@ -254,13 +318,18 @@ function Finances() {
   }, [month, year]);
 
   useEffect(() => {
+    loadFinances();
+  }, [filterCategory]);
+
+  useEffect(() => {
     const totalIncome = income
       ? income.reduce((sum, income) => sum + income.income, 0)
       : 0;
     const totalExpanses = finances
       ? finances.reduce((sum, expanse) => sum + expanse.costs, 0)
       : 0;
-    setProfit(totalIncome - totalExpanses);
+
+    setProfit(parseFloat(totalIncome - totalExpanses).toFixed(2));
   }, [finances, income]);
 
   return (
@@ -294,6 +363,25 @@ function Finances() {
                 {availableMonths.map((month, index) => (
                   <MenuItem key={`month-${index}`} value={month}>
                     {MonthNames[month]}
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+          )}
+          {availableExpanseCategorys.length > 0 && (
+            <FormControl sx={{ minWidth: 160 }}>
+              <InputLabel>Filter Expanses</InputLabel>
+              <Select
+                label="Filter Expanses"
+                value={filterCategory}
+                onChange={handleFilterCategoryChange}
+              >
+                <MenuItem key={`filterOption-all`} value="">
+                  All
+                </MenuItem>
+                {availableExpanseCategorys.map((filterOption, index) => (
+                  <MenuItem key={`filterOption-${index}`} value={filterOption}>
+                    {filterOption}
                   </MenuItem>
                 ))}
               </Select>
@@ -342,46 +430,53 @@ function Finances() {
               availableYears={availableYears}
               loadAvailableMonths={loadAvailableMonths}
               loadAvailableYears={loadAvailableYears}
+              availableCategorys={availableExpanseCategorys}
+              updateCategorys={loadAvailableExpansesCategorys}
             />
           ) : (
             <p>No Data available</p>
           )}
         </div>
-        <h1 className="topic">Income</h1>
-        <div className="left">
-          {income ? (
-            <FinancesPieChartIncome finances={income} months={month} />
-          ) : (
-            <p>No Data available</p>
-          )}
-        </div>
-        <div className="right">
-          {income ? (
-            <FinancesTableIncome
-              rows={income}
-              onUpdate={loadIncome}
-              categorys={incomeCategories}
-              year={year}
-              month={month}
-              availableMonths={availableMonths}
-              availableYears={availableYears}
-              loadAvailableMonths={loadAvailableMonths}
-              loadAvailableYears={loadAvailableYears}
-            />
-          ) : (
-            <p>No Data available</p>
-          )}
-        </div>
-        {profit > 0 ? (
-          <h1 className="topic" style={{ color: "green" }}>
-            Profit: {profit}€
-          </h1>
-        ) : (
-          <h1 className="topic" style={{ color: "red" }}>
-            Loss: {Math.abs(profit)}€
-          </h1>
+        {!filtering && (
+          <>
+            <h1 className="topic">Income</h1>
+            <div className="left">
+              {income ? (
+                <FinancesPieChartIncome finances={income} months={month} />
+              ) : (
+                <p>No Data available</p>
+              )}
+            </div>
+            <div className="right">
+              {income ? (
+                <FinancesTableIncome
+                  rows={income}
+                  onUpdate={loadIncome}
+                  categorys={incomeCategories}
+                  year={year}
+                  month={month}
+                  availableMonths={availableMonths}
+                  availableYears={availableYears}
+                  loadAvailableMonths={loadAvailableMonths}
+                  loadAvailableYears={loadAvailableYears}
+                />
+              ) : (
+                <p>No Data available</p>
+              )}
+            </div>
+            {profit >= 0 ? (
+              <h1 className="topic" style={{ color: "green" }}>
+                Profit: {profit}€
+              </h1>
+            ) : (
+              <h1 className="topic" style={{ color: "red" }}>
+                Loss: {Math.abs(profit)}€
+              </h1>
+            )}
+          </>
         )}
       </div>
+
       <AddExpenseDialog
         open={openExpense}
         onClose={() => setOpenExpense(false)}
@@ -394,6 +489,8 @@ function Finances() {
         updateMonths={loadAvailableMonths}
         availableYears={availableYears}
         availableMonths={availableMonths}
+        availableCategorys={availableExpanseCategorys}
+        updateCategorys={loadAvailableExpansesCategorys}
       />
 
       <AddIncomeDialog

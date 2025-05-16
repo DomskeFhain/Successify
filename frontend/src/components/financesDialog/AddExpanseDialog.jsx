@@ -26,6 +26,8 @@ function AddExpenseDialog({
   updateMonths,
   availableYears,
   availableMonths,
+  availableCategorys,
+  updateCategorys,
 }) {
   const handleError = useApiErrorHandler();
   const [addData, setAddData] = useState({
@@ -85,7 +87,7 @@ function AddExpenseDialog({
       const addedYear = addedDate.getFullYear();
       const addedMonth = addedDate.getMonth() + 1;
 
-      if (addedMonth === month) {
+      if (addedMonth === month || month === 0) {
         updateFinances();
       }
       if (!availableMonths.includes(addedMonth)) {
@@ -93,6 +95,10 @@ function AddExpenseDialog({
       }
       if (!availableYears.includes(addedYear)) {
         updateYears();
+      }
+
+      if (!availableCategorys.includes(addData.category)) {
+        updateCategorys();
       }
       onClose();
       setAddData({ category: "", note: "", costs: "", date: "" });
@@ -152,6 +158,7 @@ function AddExpenseDialog({
           onClick={() => {
             onClose();
             setAddData({ category: "", note: "", income: "", date: "" });
+            setErrors({});
           }}
         >
           Cancel
