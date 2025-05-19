@@ -13,6 +13,7 @@ import {
   Select,
   MenuItem,
 } from "@mui/material";
+import { alpha } from "@mui/material/styles";
 
 function AddIncomeDialog({
   open,
@@ -38,6 +39,11 @@ function AddIncomeDialog({
 
   const currentMonth = new Date().getMonth() + 1;
   const currentYear = new Date().getFullYear();
+
+  const successifyBase = "#8B0000";
+  const successifyMain = alpha(successifyBase, 0.7);
+  const successifyDark = alpha(successifyBase, 0.9);
+  const contrastText = "#fff";
 
   useEffect(() => {
     if (!open) return;
@@ -153,10 +159,28 @@ function AddIncomeDialog({
             onClose();
             setAddData({ category: "", note: "", income: "", date: "" });
           }}
+          sx={{
+            color: successifyMain,
+            "&:hover": {
+              color: successifyDark,
+              backgroundColor: alpha(successifyBase, 0.1),
+            },
+          }}
         >
           Cancel
         </Button>
-        <Button variant="contained" color="primary" onClick={handleSave}>
+        <Button
+          variant="contained"
+          color="primary"
+          onClick={handleSave}
+          sx={{
+            backgroundColor: successifyMain,
+            color: contrastText,
+            "&:hover": {
+              backgroundColor: successifyDark,
+            },
+          }}
+        >
           Add
         </Button>
       </DialogActions>
