@@ -11,6 +11,7 @@ import Todo from "./pages/To-Do/todo";
 import Sceduler from "./pages/sceduler/sceduler";
 import { AuthProvider } from "./components/AuthContex/AuthContex";
 import Finances from "./pages/Finances/Finances";
+import Timer from "./pages/Pomodoro/Timer";
 import Profile from './components/Profile/profile';
 
 const root = ReactDOM.createRoot(document.getElementById("root"));
@@ -25,9 +26,10 @@ root.render(
           <Route path="/profile" element={<Profile />} />
           <Route path="/login" element={<Login />} />
           <Route path="/todo" element={<Todo />} />
+          <Route path="/finances" element={<Finances />} />
           <Route path="/sceduler" element={<Sceduler />} />
           <Route path="/shoppinglist" element={<ShoppingList />} />
-          <Route path="/finances" element={<Finances />} />
+          <Route path="/pomodoro" element={<Timer />} />
           <Route path="*" element={<div>404 Not Found</div>} />
         </Routes>
       </Router>

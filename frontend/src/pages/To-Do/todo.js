@@ -1,13 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../components/AuthContex/AuthContex';
 import axios from 'axios';
-import { useNavigate } from 'react-router-dom';
 import './todo.css';
 import { useApiErrorHandler } from "../../components/HandleApiError/HandleApiError";
 
 function Todo() {
   const handleError = useApiErrorHandler();
-  const { token, logout } = useAuth();
+  const { token } = useAuth();
   const [lists, setLists] = useState([]);
   const [newListName, setNewListName] = useState("");
   const [editListId, setEditListId] = useState(null);
@@ -159,6 +158,7 @@ const handleDeleteTask = async (taskID) => {
       placeholder="Neue Liste eingeben"
       value={newListName}
       onChange={(e) => setNewListName(e.target.value)}
+      onKeyDown={(e) => e.key === "Enter" && postList()}
     />
     <button onClick={postList}>Hinzufügen</button>
   </div>
@@ -214,6 +214,7 @@ const handleDeleteTask = async (taskID) => {
         placeholder="Neuer Eintrag eingeben"
         value={newTaskName}
         onChange={(e) => setNewTaskName(e.target.value)}
+        onKeyDown={(e) => e.key === "Enter" && postTask(editListId) && getTask(editListId)}
       />
       <button onClick={() => {postTask(editListId); getTask(editListId)}}>Hinzufügen</button>
       
