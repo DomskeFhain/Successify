@@ -18,6 +18,7 @@ import Select from "@mui/material/Select";
 import InputLabel from "@mui/material/InputLabel";
 import MenuItem from "@mui/material/MenuItem";
 import { useState } from "react";
+import { alpha } from "@mui/material/styles";
 
 export default function FinancesTable({
   rows,
@@ -37,6 +38,11 @@ export default function FinancesTable({
   const [open, setOpen] = useState(false);
   const handleError = useApiErrorHandler();
   const [pageSize, setPageSize] = useState(5);
+
+  const successifyBase = "#8B0000";
+  const successifyMain = alpha(successifyBase, 0.7);
+  const successifyDark = alpha(successifyBase, 0.9);
+  const contrastText = "#fff";
 
   const handleEdit = (row) => {
     setEditData(row);
@@ -168,13 +174,10 @@ export default function FinancesTable({
           pageSizeOptions={[5, 10]}
           disableRowSelectionOnClick
           sx={{
-            border: 0,
+            border: 1,
+            borderColor: "#8B0000",
             backgroundColor: "rgb(114, 114, 114)",
             color: "white",
-
-            "& .MuiDataGrid-columnHeaders": {
-              backgroundColor: "green",
-            },
 
             "& .MuiDataGrid-columnHeader": {
               display: "flex",
@@ -187,7 +190,7 @@ export default function FinancesTable({
             },
 
             "& .MuiDataGrid-columnHeaderTitle": {
-              color: "blue",
+              color: "#8B0000",
               fontWeight: "bold",
               textAlign: "center",
               width: "100%",
@@ -208,6 +211,19 @@ export default function FinancesTable({
 
             "& .MuiCheckbox-root svg": {
               fill: "white",
+            },
+            "& .MuiTablePagination-root": {
+              color: "white",
+            },
+            "& .MuiTablePagination-toolbar": {
+              color: "white",
+            },
+            "& .MuiTablePagination-selectLabel, & .MuiTablePagination-displayedRows":
+              {
+                color: "white",
+              },
+            "& .MuiTablePagination-select": {
+              color: "white",
             },
           }}
         />
@@ -256,10 +272,31 @@ export default function FinancesTable({
           />
         </DialogContent>
         <DialogActions>
-          <Button onClick={handleClose} color="primary">
+          <Button
+            onClick={handleClose}
+            color="primary"
+            sx={{
+              color: successifyMain,
+              "&:hover": {
+                color: successifyDark,
+                backgroundColor: alpha(successifyBase, 0.1),
+              },
+            }}
+          >
             Cancel
           </Button>
-          <Button onClick={handleSave} variant="contained" color="primary">
+          <Button
+            onClick={handleSave}
+            variant="contained"
+            color="primary"
+            sx={{
+              backgroundColor: successifyMain,
+              color: contrastText,
+              "&:hover": {
+                backgroundColor: successifyDark,
+              },
+            }}
+          >
             Save
           </Button>
         </DialogActions>

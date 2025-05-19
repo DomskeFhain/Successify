@@ -11,6 +11,7 @@ import Select from "@mui/material/Select";
 import InputLabel from "@mui/material/InputLabel";
 import FormControl from "@mui/material/FormControl";
 import Button from "@mui/material/Button";
+import { alpha } from "@mui/material/styles";
 import FinancesTableIncome from "../../components/FinancesTable/FinancesTableIncome";
 import AddExpenseDialog from "../../components/financesDialog/AddExpanseDialog";
 import AddIncomeDialog from "../../components/financesDialog/AddIncomeDialog";
@@ -34,6 +35,11 @@ function Finances() {
   );
   const [filterCategory, setFilterCategory] = useState("");
   const [filtering, setFiltering] = useState(false);
+
+  const successifyBase = "#8B0000";
+  const successifyMain = alpha(successifyBase, 0.7);
+  const successifyDark = alpha(successifyBase, 0.9);
+  const contrastText = "#fff";
 
   const MonthNames = {
     1: "January",
@@ -520,9 +526,15 @@ function Finances() {
         <div className="addButtons">
           <Button
             variant="contained"
-            color="primary"
             onClick={() => {
               setOpenExpense(true);
+            }}
+            sx={{
+              backgroundColor: successifyMain,
+              color: contrastText,
+              "&:hover": {
+                backgroundColor: successifyDark,
+              },
             }}
           >
             Add Expense
@@ -532,6 +544,13 @@ function Finances() {
             color="primary"
             onClick={() => {
               setOpenIncome(true);
+            }}
+            sx={{
+              backgroundColor: successifyMain,
+              color: contrastText,
+              "&:hover": {
+                backgroundColor: successifyDark,
+              },
             }}
           >
             Add Income
