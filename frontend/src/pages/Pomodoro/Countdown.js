@@ -90,6 +90,7 @@ export default function Countdown() {
       <Box mb={2}>
         <Typography>Focus Duration: {focusDuration} min</Typography>
         <Slider
+          color="red"
           value={focusDuration}
           min={5}
           max={60}
@@ -109,6 +110,7 @@ export default function Countdown() {
       <Box mb={2}>
         <Typography>Break Duration: {breakDuration} min</Typography>
         <Slider
+          color="red"
           value={breakDuration}
           min={5}
           max={30}
@@ -128,6 +130,7 @@ export default function Countdown() {
       <Box mb={2}>
         <Typography>Intervals: {totalCycles}</Typography>
         <Slider
+          color="red"
           value={totalCycles}
           min={1}
           max={4}
@@ -166,15 +169,18 @@ export default function Countdown() {
         </Box>
       </Box>
 
-      <Box mt={4} display="flex" justifyContent="center" gap={2}>
+      <Box mt={4} mb={6} display="flex" justifyContent="center" gap={2} >
         <Button
-          variant="contained"
-          color={isRunning ? "secondary" : "primary"}
+          variant="outlined"
+          color={isRunning ? "red" : "red"}
           onClick={() => setIsRunning(!isRunning)}
         >
           {isRunning ? "Pause" : "Start"}
         </Button>
-        <Button variant="outlined" onClick={resetTimer}>
+        <Button 
+        variant="outlined"
+        color="winered"
+        onClick={resetTimer}>
           Reset
         </Button>
       </Box>

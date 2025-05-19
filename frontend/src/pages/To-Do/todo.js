@@ -3,6 +3,7 @@ import { useAuth } from '../../components/AuthContex/AuthContex';
 import axios from 'axios';
 import './todo.css';
 import { useApiErrorHandler } from "../../components/HandleApiError/HandleApiError";
+import Button from '@mui/material/Button';
 
 function Todo() {
   const handleError = useApiErrorHandler();
@@ -150,8 +151,6 @@ const handleDeleteTask = async (taskID) => {
 
   return (
 <div className="todo">
-  <h1>Successify | ToDo-Listen</h1>
-
   <div className="new-list">
     <input
       type="text"
@@ -160,7 +159,11 @@ const handleDeleteTask = async (taskID) => {
       onChange={(e) => setNewListName(e.target.value)}
       onKeyDown={(e) => e.key === "Enter" && postList()}
     />
-    <button onClick={postList}>Hinzufügen</button>
+    <Button 
+    variant='outlined'
+    color="red"
+    size="small"
+    onClick={postList}>Hinzufügen</Button>
   </div>
 
   {lists.length > 0 && (
@@ -185,8 +188,16 @@ const handleDeleteTask = async (taskID) => {
       {editListId && (
         <>
           <div className="edit-buttons">
-            <button onClick={() => setEditMode(true)}>Bearbeiten</button>
-            <button onClick={() => deleteList(editListId)}>Löschen</button>
+            <Button 
+            variant='outlined'
+              color="red"
+              size="small"
+              onClick={() => setEditMode(true)}>Bearbeiten</Button>
+            <Button 
+            variant='outlined'
+            color='red'
+            size='small'
+            onClick={() => deleteList(editListId)}>Löschen</Button>
           </div>
         
 
@@ -197,37 +208,61 @@ const handleDeleteTask = async (taskID) => {
                 value={editListName}
                 onChange={(e) => setEditListName(e.target.value)}
               />
-              <button
+              <Button
+              variant='outlined'
+                color="red"
+                size="small"
                 onClick={() => {
                   updateList();
                   setEditMode(false);
                 }}
               >
                 Speichern
-              </button>
-              <button onClick={() => setEditMode(false)}>Abbrechen</button>
+              </Button>
+              <Button 
+              variant='outlined'
+              color='red'
+              size='small'
+              onClick={() => setEditMode(false)}>Abbrechen</Button>
             </div>
           )}
-    <div className='tasksContainer'>  
-      <input
-        type="text"
-        placeholder="Neuer Eintrag eingeben"
-        value={newTaskName}
-        onChange={(e) => setNewTaskName(e.target.value)}
-        onKeyDown={(e) => e.key === "Enter" && postTask(editListId) && getTask(editListId)}
-      />
-      <button onClick={() => {postTask(editListId); getTask(editListId)}}>Hinzufügen</button>
+      <div className="task-input-group">
+          <input
+          type="text"
+          placeholder="Neuer Eintrag eingeben"
+          value={newTaskName}
+          onChange={(e) => setNewTaskName(e.target.value)}
+          onKeyDown={(e) => e.key === "Enter" && postTask(editListId) && getTask(editListId)}
+          />
+          <Button 
+          variant='outlined'
+            color='red'
+            size='small'
+            onClick={() => {postTask(editListId); getTask(editListId)}}
+          >
+          Hinzufügen
+          </Button>
+      </div>
       
       <ul>
         {tasks.map((task) => (
           <p key={task.taskID} style={task.done ? {textDecoration: "line-through"} : {textDecoration: "none"}}>
             {task.taskName}
             <input type="checkbox" onChange={() => toggleEditDoneTask(task.taskID, task.done)} checked={task.done}/>
-            <button onClick={() => {
+            <div className="edit-buttons">
+            <Button 
+            variant='outlined'
+            color="red"
+            size="small"
+            onClick={() => {
             setEditTaskId(task.taskID);
-            setEditTaskName(task.taskName);}}>Bearbeiten</button>
-            <button onClick={() => handleDeleteTask(task.taskID)}>Löschen</button>
-
+            setEditTaskName(task.taskName);}}>Bearbeiten</Button>
+            <Button
+            variant='outlined' 
+            color="red"
+            size="small"
+            onClick={() => handleDeleteTask(task.taskID)}>Löschen</Button>
+            </div>
 
             {editTaskId === task.taskID && (
               <div className="edit-controls">
@@ -236,18 +271,26 @@ const handleDeleteTask = async (taskID) => {
                   value={editTaskName}
                   onChange={(e) => setEditTaskName(e.target.value)}
                 />
-                <button onClick={() =>{ 
+                <Button 
+                variant='outlined'
+                color="red"
+                size="small"
+                onClick={() =>{ 
                 updateTask(editTaskId);
                 setEditTaskName("");
                 getTask(editListId);
-                setEditTaskId(null);}}>Speichern</button>
-                <button onClick={() => setEditTaskId(null)}>Abbrechen</button>
+                setEditTaskId(null);}}>Speichern</Button>
+                <Button 
+                variant='outlined'
+                color="red"
+                size="small"
+                onClick={() => setEditTaskId(null)}>Abbrechen</Button>
               </div>
             )}
           </p>
         ))}
       </ul>
-      </div>
+
 
 
         </>

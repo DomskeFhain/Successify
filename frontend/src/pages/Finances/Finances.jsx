@@ -11,6 +11,7 @@ import Select from "@mui/material/Select";
 import InputLabel from "@mui/material/InputLabel";
 import FormControl from "@mui/material/FormControl";
 import Button from "@mui/material/Button";
+import { alpha } from "@mui/material/styles";
 import FinancesTableIncome from "../../components/FinancesTable/FinancesTableIncome";
 import AddExpenseDialog from "../../components/financesDialog/AddExpanseDialog";
 import AddIncomeDialog from "../../components/financesDialog/AddIncomeDialog";
@@ -34,6 +35,11 @@ function Finances() {
   );
   const [filterCategory, setFilterCategory] = useState("");
   const [filtering, setFiltering] = useState(false);
+
+  const successifyBase = "#8B0000";
+  const successifyMain = alpha(successifyBase, 0.7);
+  const successifyDark = alpha(successifyBase, 0.9);
+  const contrastText = "#fff";
 
   const MonthNames = {
     1: "January",
@@ -102,6 +108,34 @@ function Finances() {
   // Monthly Finaces
   async function loadFinances() {
     try {
+      if (year === "All") {
+        if (month === 0) {
+          let query = `http://localhost:9000/allFinances?`;
+
+          if (filterCategory) {
+            query += `category=${filterCategory}`;
+          }
+          const response = await axios.get(query, {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          });
+          return setFinances(response.data);
+        } else {
+          const paddedMonth = month.toString().padStart(2, "0");
+          let query = `http://localhost:9000/allFinances?month=${paddedMonth}`;
+
+          if (filterCategory) {
+            query += `&category=${filterCategory}`;
+          }
+          const response = await axios.get(query, {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          });
+          return setFinances(response.data);
+        }
+      }
       if (month === 0) {
         let query = `http://localhost:9000/yearlyFinances?year=${year}`;
 
@@ -145,6 +179,28 @@ function Finances() {
 
   async function loadIncome() {
     try {
+      if (year === "All") {
+        if (month === 0) {
+          let query = `http://localhost:9000/allIncome`;
+
+          const response = await axios.get(query, {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          });
+          return setIncome(response.data);
+        } else {
+          const paddedMonth = month.toString().padStart(2, "0");
+          let query = `http://localhost:9000/allIncome?month=${paddedMonth}`;
+
+          const response = await axios.get(query, {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          });
+          return setIncome(response.data);
+        }
+      }
       if (month === 0) {
         const response = await axios.get(
           `http://localhost:9000/yearlyFinancesIncome?year=${year}`,
@@ -190,7 +246,8 @@ function Finances() {
       });
 
       if (response.data.length === 0) {
-        return setAvailableYears([year]);
+        const todayYear = new Date().getFullYear();
+        return setAvailableYears([todayYear]);
       }
       const availableYearsArray = response.data.map((year) => year.years);
       return setAvailableYears(availableYearsArray);
@@ -203,6 +260,28 @@ function Finances() {
 
   async function loadAvailableMonths() {
     try {
+      if (filtering) {
+        loadAvailableFilteredMonths();
+        return;
+      }
+      if (year === "All") {
+        const response = await axios.get(
+          `http://localhost:9000/allFinancesMonths`,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+
+        if (response.data.length === 0) {
+          return setAvailableMonths([]);
+        }
+        const availableMonthsArray = response.data.map((month) =>
+          Number(month.months)
+        );
+        return setAvailableMonths(availableMonthsArray);
+      }
       const response = await axios.get(
         `http://localhost:9000/financesMonths?year=${year}`,
         {
@@ -224,11 +303,68 @@ function Finances() {
     }
   }
 
+  // load available Filtered Months
+
+  async function loadAvailableFilteredMonths() {
+    try {
+      let query = `http://localhost:9000/financesFilteredMonths`;
+
+      if (year !== "All") {
+        query += `?year=${year}`;
+      }
+      const response = await axios.get(query, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      if (response.data.length === 0) {
+        return setAvailableMonths([]);
+      }
+      const availableMonthsArray = response.data.map((month) =>
+        Number(month.months)
+      );
+      return setAvailableMonths(availableMonthsArray);
+    } catch (error) {
+      handleError(error);
+    }
+  }
+
   // load available ExpanseCategorys
 
   async function loadAvailableExpansesCategorys() {
     try {
       let query;
+      if (year === "All") {
+        query = "http://localhost:9000/financesCategorys";
+
+        if (month !== 0) {
+          const paddedMonth = month.toString().padStart(2, "0");
+          query += `?month=${paddedMonth}`;
+        }
+
+        const response = await axios.get(query, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+
+        if (response.data.length === 0) {
+          return setAvailableExpanseCategorys([]);
+        }
+        const availableExpanseCategorysArray = response.data.map(
+          (category) => category.category
+        );
+
+        if (
+          filterCategory !== "" &&
+          !availableExpanseCategorysArray.includes(filterCategory)
+        ) {
+          availableExpanseCategorysArray.push(filterCategory);
+        }
+        return setAvailableExpanseCategorys(availableExpanseCategorysArray);
+      }
+
       if (month === 0) {
         query = `http://localhost:9000/financesCategorys?year=${year}`;
       } else {
@@ -289,7 +425,7 @@ function Finances() {
   // Get Available Months
   useEffect(() => {
     loadAvailableMonths();
-  }, [year]);
+  }, [year, filtering, month]);
 
   // Get Available Categorys
 
@@ -341,6 +477,9 @@ function Finances() {
             <FormControl sx={{ minWidth: 120 }}>
               <InputLabel>Year</InputLabel>
               <Select label="Year" value={year} onChange={handleYearChange}>
+                <MenuItem key={`yearOption-all`} value="All">
+                  All
+                </MenuItem>
                 {availableYears.map((yearOption, index) => (
                   <MenuItem key={`yearOption-${index}`} value={yearOption}>
                     {yearOption}
@@ -352,11 +491,7 @@ function Finances() {
           {availableMonths.length > 0 && (
             <FormControl sx={{ minWidth: 120 }}>
               <InputLabel>Month</InputLabel>
-              <Select
-                label="Month"
-                value={availableMonths.includes(month) ? month : 0}
-                onChange={handleMonthChange}
-              >
+              <Select label="Month" value={month} onChange={handleMonthChange}>
                 <MenuItem key="all" value={0}>
                   All
                 </MenuItem>
@@ -391,9 +526,15 @@ function Finances() {
         <div className="addButtons">
           <Button
             variant="contained"
-            color="primary"
             onClick={() => {
               setOpenExpense(true);
+            }}
+            sx={{
+              backgroundColor: successifyMain,
+              color: contrastText,
+              "&:hover": {
+                backgroundColor: successifyDark,
+              },
             }}
           >
             Add Expense
@@ -403,6 +544,13 @@ function Finances() {
             color="primary"
             onClick={() => {
               setOpenIncome(true);
+            }}
+            sx={{
+              backgroundColor: successifyMain,
+              color: contrastText,
+              "&:hover": {
+                backgroundColor: successifyDark,
+              },
             }}
           >
             Add Income
@@ -415,7 +563,7 @@ function Finances() {
           {finances ? (
             <FinancesPieChart finances={finances} months={month} />
           ) : (
-            <p>No Data available</p>
+            <p className="data">No Data available</p>
           )}
         </div>
         <div className="right">
@@ -434,7 +582,7 @@ function Finances() {
               updateCategorys={loadAvailableExpansesCategorys}
             />
           ) : (
-            <p>No Data available</p>
+            <p className="data">No Data available</p>
           )}
         </div>
         {!filtering && (
@@ -444,7 +592,7 @@ function Finances() {
               {income ? (
                 <FinancesPieChartIncome finances={income} months={month} />
               ) : (
-                <p>No Data available</p>
+                <p className="data">No Data available</p>
               )}
             </div>
             <div className="right">
@@ -461,7 +609,7 @@ function Finances() {
                   loadAvailableYears={loadAvailableYears}
                 />
               ) : (
-                <p>No Data available</p>
+                <p className="data">No Data available</p>
               )}
             </div>
             {profit >= 0 ? (
