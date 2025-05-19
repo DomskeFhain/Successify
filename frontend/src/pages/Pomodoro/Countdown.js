@@ -57,6 +57,7 @@ useEffect(() => {
                 if (nextCycle >= totalCycles) {
                   setIsRunning(false);
                   setCycleCompleted(true);
+                  resetTimer();
                   return prevCycle;
                 } else {
                   setDisplayMessage(false);
