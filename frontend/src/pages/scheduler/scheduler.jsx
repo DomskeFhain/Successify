@@ -72,6 +72,7 @@ function SchedulerComponent() {
         createdBy: event.createdBy,
       }));
       setEvents(serverEvents);
+      console.log("Events: DEBUGG AFTER FOMRATTER", serverEvents);
     } catch (error) {
       handleError(error);
     }
@@ -85,8 +86,23 @@ function SchedulerComponent() {
       suffix = 'PM';
       if (hour > 12) hour -= 12;
     }
-    return `${hour}:${minutes} ${suffix}`;
+    if (hour === 0) hour = 12;
+
+    return `${String(hour).padStart(2, '0')}:${minutes} ${suffix}`;
   };
+
+  // // ALT 
+  // const convertTo12HourFormat = (time) => {
+  //   const [hours, minutes] = time.split(':');
+  //   let suffix = 'AM';
+  //   let hour = parseInt(hours, 10);
+  //   if (hour >= 12) {
+  //     suffix = 'PM';
+  //     if (hour > 12) hour -= 12;
+  //   }
+  //   return ${hour}:${minutes} ${suffix};
+  // };
+
 
   const convertTo24HourFormat = (time12h) => {
     const [time, modifier] = time12h.split(' ');
@@ -219,8 +235,8 @@ function SchedulerComponent() {
         }}
         alertProps={{
           open: true,
-          color: "info",
-          severity: "info",
+          color: "success",
+          severity: "success",
           message: "🚀 Let's start with the Successify Scheduler ✅✅✅",
           showActionButton: false,
           showNotification: false,
