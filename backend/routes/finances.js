@@ -74,22 +74,28 @@ router.get("/financesFilteredMonths", auth, (req, res) => {
     const { id } = req.user;
     const { year } = req.query;
 
-    db.all(
-      `SELECT CAST(strftime('%m', date) AS INTEGER) AS months
+    let query = `SELECT DISTINCT CAST(strftime('%m', date) AS INTEGER) AS months
         FROM finances
-        WHERE strftime('%Y', date) = ? AND user_id = ?
-      ORDER BY months;`,
-      [year, id, year, id],
-      (err, rows) => {
-        if (err) {
-          console.error(err);
-          return res
-            .status(500)
-            .json({ error: "Database Error, please try again later!" });
-        }
-        res.status(200).json(rows);
+        WHERE user_id = ?`;
+
+    const values = [id];
+
+    if (year) {
+      query += ` AND strftime('%Y', date) = ?`;
+      values.push(year);
+    }
+
+    query += ` ORDER BY months;`;
+
+    db.all(query, values, (err, rows) => {
+      if (err) {
+        console.error(err);
+        return res
+          .status(500)
+          .json({ error: "Database Error, please try again later!" });
       }
-    );
+      res.status(200).json(rows);
+    });
   } catch (error) {
     console.error(error);
     res

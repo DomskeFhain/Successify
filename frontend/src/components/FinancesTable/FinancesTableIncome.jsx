@@ -149,25 +149,11 @@ export default function FinancesTableIncome({
     },
   ];
 
-  const MIN_ROWS = pageSize;
-
-  const filledRows = [
-    ...rows,
-    ...Array.from({ length: Math.max(0, MIN_ROWS - rows.length) }, (_, i) => ({
-      id: `empty-${i}`, // Wichtig: Eindeutige ID
-      category: "",
-      note: "",
-      income: "",
-      date: "",
-      isPlaceholder: true,
-    })),
-  ];
-
   return (
     <>
       <Paper>
         <DataGrid
-          rows={filledRows}
+          rows={rows}
           columns={columns}
           initialState={{
             pagination: { paginationModel: { page: 0, pageSize } },

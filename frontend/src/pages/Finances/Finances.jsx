@@ -240,7 +240,8 @@ function Finances() {
       });
 
       if (response.data.length === 0) {
-        return setAvailableYears([year]);
+        const todayYear = new Date().getFullYear();
+        return setAvailableYears([todayYear]);
       }
       const availableYearsArray = response.data.map((year) => year.years);
       return setAvailableYears(availableYearsArray);
@@ -253,6 +254,10 @@ function Finances() {
 
   async function loadAvailableMonths() {
     try {
+      if (filtering) {
+        loadAvailableFilteredMonths();
+        return;
+      }
       if (year === "All") {
         const response = await axios.get(
           `http://localhost:9000/allFinancesMonths`,
@@ -279,6 +284,33 @@ function Finances() {
           },
         }
       );
+
+      if (response.data.length === 0) {
+        return setAvailableMonths([]);
+      }
+      const availableMonthsArray = response.data.map((month) =>
+        Number(month.months)
+      );
+      return setAvailableMonths(availableMonthsArray);
+    } catch (error) {
+      handleError(error);
+    }
+  }
+
+  // load available Filtered Months
+
+  async function loadAvailableFilteredMonths() {
+    try {
+      let query = `http://localhost:9000/financesFilteredMonths`;
+
+      if (year !== "All") {
+        query += `?year=${year}`;
+      }
+      const response = await axios.get(query, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
 
       if (response.data.length === 0) {
         return setAvailableMonths([]);
@@ -387,7 +419,7 @@ function Finances() {
   // Get Available Months
   useEffect(() => {
     loadAvailableMonths();
-  }, [year]);
+  }, [year, filtering, month]);
 
   // Get Available Categorys
 
