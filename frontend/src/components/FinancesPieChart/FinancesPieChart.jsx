@@ -76,8 +76,8 @@ const FinancesPieChart = ({ finances, months }) => {
             faded: { innerRadius: 30, additionalRadius: -30, color: "gray" },
           },
         ]}
-        height={300}
-        width={400}
+        height={380}
+        width={450}
       />
     </>
   );

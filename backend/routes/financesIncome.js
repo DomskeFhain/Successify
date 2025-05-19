@@ -51,6 +51,45 @@ router.get("/yearlyFinancesIncome", auth, (req, res) => {
   }
 });
 
+router.get("/allIncome", auth, (req, res) => {
+  try {
+    const { id } = req.user;
+    const { month } = req.query;
+
+    let query = `
+                SELECT id, category, note, income, date
+                FROM financesIncome
+                WHERE user_id = ?`;
+
+    const values = [id];
+
+    if (month) {
+      query += ` AND strftime('%m', date) = ?`;
+      values.push(month);
+    }
+
+    query += ` ORDER BY date`;
+
+    db.all(query, values, (err, rows) => {
+      if (err) {
+        console.error(err);
+        return res.status(500).send("Database error");
+      }
+
+      if (rows.length === 0) {
+        return res.status(404).send("No Data Found");
+      }
+
+      res.status(200).json(rows);
+    });
+  } catch (error) {
+    console.error(error);
+    res
+      .status(500)
+      .json({ error: "Internal Server Error, Please try again later!" });
+  }
+});
+
 router.post("/financesIncome", auth, (req, res) => {
   try {
     const { id } = req.user;
