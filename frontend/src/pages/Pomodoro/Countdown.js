@@ -1,11 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
-import {
-  Slider,
-  CircularProgress,
-  Typography,
-  Box,
-  Button,
-} from "@mui/material";
+import { Slider, CircularProgress, Typography, Box, Button } from "@mui/material";
 
 export default function Countdown() {
   const [focusDuration, setFocusDuration] = useState(25);
@@ -17,50 +11,10 @@ export default function Countdown() {
   const [isRunning, setIsRunning] = useState(false);
   const intervalRef = useRef(null);
   const audioRef = useRef(null);
+  const [initialDuration, setInitialDuration] = useState(focusDuration * 60);
   const [cycleCompleted, setCycleCompleted] = useState(false);
-
-useEffect(() => {
-    audioRef.current = new Audio("/alarm.mp3");
-  if (isRunning) {
-    intervalRef.current = setInterval(() => {
-      setSeconds((prevSec) => {
-        if (prevSec === 0) {
-          return 59;
-        } else {
-          return prevSec - 1;
-        }
-      });
-
-      setMinutes((prevMin) => {
-        if (seconds === 0) {
-            if (prevMin === 0) {
-                if (audioRef.current) audioRef.current.play();
-
-                if (displayMessage) {
-
-                setIsRunning(false);
-                setCycleCompleted(true);
-                resetTimer()
-                } else {
-                setDisplayMessage(true);
-                setMinutes(breakDuration - 1);
-                setSeconds(59);
-                return breakDuration - 1;
-                }
-                } else {
-            return prevMin - 1;
-}
-        }
-        return prevMin;
-      });
-    }, 1000);
-  } else {
-    clearInterval(intervalRef.current);
-  }
-
-  return () => clearInterval(intervalRef.current);
-}, [isRunning, displayMessage, focusDuration, breakDuration, seconds]);
-
+  const [totalCycles, setTotalCycles] = useState(4);
+  const [currentCycle, setCurrentCycle] = useState(0);
 
   const resetTimer = () => {
     clearInterval(intervalRef.current);
@@ -69,12 +23,62 @@ useEffect(() => {
     setBreakDuration(5);
     setMinutes(25);
     setSeconds(0);
+    setCurrentCycle(0);
+    setTotalCycles(4);
     setDisplayMessage(false);
     setProgress(0);
   };
 
   const timerMinutes = minutes < 10 ? `0${minutes}` : minutes;
   const timerSeconds = seconds < 10 ? `0${seconds}` : seconds;
+
+
+useEffect(() => {
+  audioRef.current = new Audio("/alarm.mp3");
+
+  if (isRunning) {
+    intervalRef.current = setInterval(() => {
+      setSeconds((prevSec) => {
+        if (prevSec === 0) {
+          
+          if (minutes > 0) {
+            setMinutes(prevMin => prevMin - 0.5);
+            return 59;
+          } else {
+            if (audioRef.current) audioRef.current.play();
+            
+            if (!displayMessage) {
+              setDisplayMessage(true); 
+              setMinutes(breakDuration); 
+              setSeconds(0);
+            } else {
+              setCurrentCycle(prevCycle => {
+                const nextCycle = prevCycle + 0.5;
+                if (nextCycle >= totalCycles) {
+                  setIsRunning(false);
+                  setCycleCompleted(true);
+                  return prevCycle;
+                } else {
+                  setDisplayMessage(false);
+                  setMinutes(focusDuration);
+                  setSeconds(0);
+                  return nextCycle;
+                }
+              });
+            }
+            return 0;
+          }
+        }
+        return prevSec - 1;
+      });
+    }, 1000);
+  } else {
+    clearInterval(intervalRef.current);
+  }
+
+  return () => clearInterval(intervalRef.current);
+}, [isRunning, displayMessage, focusDuration, breakDuration, minutes, totalCycles]);
+
 
   return (
     <Box textAlign="center" mt={4}>
@@ -94,6 +98,7 @@ useEffect(() => {
             if (!displayMessage && !isRunning) {
               setMinutes(newValue);
               setSeconds(0);
+              setInitialDuration(newValue * 60);
             }
           }}
           disabled={isRunning}
@@ -112,7 +117,22 @@ useEffect(() => {
             if (displayMessage && !isRunning) {
               setMinutes(newValue);
               setSeconds(0);
+              setInitialDuration(newValue * 60);
             }
+          }}
+          disabled={isRunning}
+        />
+      </Box>
+
+      <Box mb={2}>
+        <Typography>Intervals: {totalCycles}</Typography>
+        <Slider
+          value={totalCycles}
+          min={1}
+          max={4}
+          step={1}
+          onChange={(e, newValue) => {
+            setTotalCycles(newValue);
           }}
           disabled={isRunning}
         />
@@ -138,6 +158,9 @@ useEffect(() => {
           )}
           <Typography variant="h4">
             {timerMinutes}:{timerSeconds}
+          </Typography>
+          <Typography variant="body2">
+            Cycle {currentCycle + 1} of {totalCycles}
           </Typography>
         </Box>
       </Box>
