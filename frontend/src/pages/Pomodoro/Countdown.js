@@ -169,7 +169,7 @@ useEffect(() => {
         </Box>
       </Box>
 
-      <Box mt={4} display="flex" justifyContent="center" gap={2}>
+      <Box mt={4} mb={6} display="flex" justifyContent="center" gap={2} >
         <Button
           variant="outlined"
           color={isRunning ? "red" : "red"}
