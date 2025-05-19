@@ -1,25 +1,26 @@
 .todo{
     margin: 2rem auto;
     padding: 2rem;
-    background-color: #ababab;
+    background-color: #d9d9d9;
     border-radius: 8px;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
     flex-direction: column;
     text-align: center;
+    color : #8B0000
 }
 .dropdown-container{
     margin: 1rem auto;
     padding: 1rem;
-    background-color: #bababa;
+    background-color: #d9d9d9;
     border-radius: 8px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+
 }
 .tasksContainer{
     margin: 1rem auto;
     padding: 1rem;
-    background-color: #ababab;
+    background-color: #d9d9d9;
     border-radius: 8px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+
 }
 
 .edit-buttons{
