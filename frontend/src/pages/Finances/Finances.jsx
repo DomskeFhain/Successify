@@ -563,7 +563,7 @@ function Finances() {
           {finances ? (
             <FinancesPieChart finances={finances} months={month} />
           ) : (
-            <p>No Data available</p>
+            <p className="data">No Data available</p>
           )}
         </div>
         <div className="right">
@@ -582,7 +582,7 @@ function Finances() {
               updateCategorys={loadAvailableExpansesCategorys}
             />
           ) : (
-            <p>No Data available</p>
+            <p className="data">No Data available</p>
           )}
         </div>
         {!filtering && (
@@ -592,7 +592,7 @@ function Finances() {
               {income ? (
                 <FinancesPieChartIncome finances={income} months={month} />
               ) : (
-                <p>No Data available</p>
+                <p className="data">No Data available</p>
               )}
             </div>
             <div className="right">
@@ -609,7 +609,7 @@ function Finances() {
                   loadAvailableYears={loadAvailableYears}
                 />
               ) : (
-                <p>No Data available</p>
+                <p className="data">No Data available</p>
               )}
             </div>
             {profit >= 0 ? (
