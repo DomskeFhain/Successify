@@ -29,6 +29,8 @@ export default function FinancesTable({
   availableYears,
   loadAvailableMonths,
   loadAvailableYears,
+  availableCategorys,
+  updateCategorys,
 }) {
   const { token } = useAuth();
   const [editData, setEditData] = useState(null);
@@ -89,6 +91,9 @@ export default function FinancesTable({
 
       if (isAllSelected || (isSameYear && isSameMonth)) {
         await onUpdate();
+        if (!availableCategorys.includes(editData.category)) {
+          await updateCategorys();
+        }
       }
 
       if (onUpdate) onUpdate();
@@ -105,6 +110,8 @@ export default function FinancesTable({
       });
 
       if (onUpdate) onUpdate();
+
+      updateCategorys();
     } catch (error) {
       handleError(error);
     }

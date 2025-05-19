@@ -85,7 +85,7 @@ function AddIncomeDialog({
       const addedYear = addedDate.getFullYear();
       const addedMonth = addedDate.getMonth() + 1;
 
-      if (addedMonth === month) {
+      if (addedMonth === month || month === 0) {
         updateIncome();
       }
       if (!availableMonths.includes(addedMonth)) {
