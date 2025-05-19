@@ -5,15 +5,37 @@ import { useApiErrorHandler } from '../HandleApiError/HandleApiError';
 import TextField from '@mui/material/TextField';
 import Button from '@mui/material/Button';
 import './profile.css';
+import { useNavigate } from 'react-router-dom';
+import Box from '@mui/material/Box';
 
 function Profile() {
-    const { token } = useAuth();
+    const { token, logout } = useAuth();
     const handleError = useApiErrorHandler();
     const [userData, setUserData] = useState(null);
     const [currentPassword, setCurrentPassword] = useState('');
     const [newPassword, setNewPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
     const [message, setMessage] = useState(null);
+    const navigate = useNavigate();
+    const [confirmDeleteVisible, setConfirmDeleteVisible] = useState(false);
+    const [newUsername, setNewUsername] = useState('');
+
+    const handleDeleteClick = async () => {
+        try {
+            await axiosAuth.delete('/user');
+            alert("Your profile has been successfully deleted!");
+
+            logout();
+            navigate('/');
+        } catch (error) {
+            if (error.response) {
+                alert(error.response.data.message);
+            } else {
+                alert("An unexpected error occurred");
+                console.error(error);
+            }
+        }
+    };
 
     const axiosAuth = axios.create({
         baseURL: 'http://localhost:9000',
@@ -36,11 +58,16 @@ function Profile() {
         }
     };
 
-    const handlePasswordChange = async (event) => {
+    const handleProfileChange = async (event) => {
         event.preventDefault();
 
-        if (newPassword !== confirmPassword) {
-            setMessage('The passwords do not match');
+        if (!newPassword && newUsername === userData.username) {
+            setMessage("No new password or username has been entered.");
+            return;
+        }
+
+        if (newPassword && newPassword !== confirmPassword) {
+            setMessage('The passwords does not match');
             setNewPassword('');
             setConfirmPassword('');
             return;
@@ -48,13 +75,18 @@ function Profile() {
 
         try {
             await axiosAuth.put('/user', {
+                newUsername: newUsername !== userData.username ? newUsername : undefined,
                 password: currentPassword,
-                newPassword: newPassword
+                newPassword: newPassword || undefined,
             });
-            setMessage('Password successfully changed');
+
+            setMessage('Profile has been successfully changed!');
             setCurrentPassword('');
             setNewPassword('');
             setConfirmPassword('');
+            setNewUsername('');
+            fetchUserData();
+
         } catch (error) {
             if (error.response) {
                 setMessage(error.response.data.message);
@@ -69,12 +101,18 @@ function Profile() {
             <div className="profile-content">
                 {userData && (<>
                     <h1>{userData.username}'s profile</h1>
-                    <div className="user-info">
-                        <p>Username: {userData.username}</p>
-                    </div>
                 </>)}
 
-                <form onSubmit={handlePasswordChange} className="password-form">
+                <form onSubmit={handleProfileChange} className="password-form">
+                    <h3>Edit Username</h3>
+                    <TextField
+                        required
+                        label="Enter new username"
+                        value={newUsername}
+                        onChange={(event) => setNewUsername(event.target.value)}
+                        fullWidth
+                        margin="normal"
+                    />
                     <h3>Change Password</h3>
                     <TextField
                         required
@@ -85,7 +123,6 @@ function Profile() {
                         fullWidth
                         margin="normal"
                     />
-                    <h3>New Password</h3>
                     <TextField
                         required
                         type="password"
@@ -104,14 +141,34 @@ function Profile() {
                         fullWidth
                         margin="normal"
                     />
-                    <Button
-                        variant="contained"
-                        color="primary"
-                        type="submit"
-                        sx={{ mt: 2, justifySelf: 'center', textAlign: 'center', display: 'flex' }}
-                    >
-                        confirm change
-                    </Button>
+                    <Box sx={{ display: 'flex', justifyContent: 'center', gap: 2, mt: 2 }}>
+                        <Button variant="contained" color="primary" type="submit">
+                            confirm change
+                        </Button>
+                        <Button variant="outlined" color="error" onClick={() => setConfirmDeleteVisible(true)}>
+                            Delete profile
+                        </Button>
+                    </Box>
+                    {confirmDeleteVisible && (
+                        <div className="confirm-box">
+                            <p>Are you sure you want to delete your profile?</p>
+                            <div className="confirm-buttons">
+                                <Button onClick={() => setConfirmDeleteVisible(false)}>
+                                    Cancel
+                                </Button>
+                                <Button
+                                    color="error"
+                                    onClick={async () => {
+                                        await handleDeleteClick();
+                                        setConfirmDeleteVisible(false);
+                                    }}
+                                >
+                                    Delete
+                                </Button>
+                            </div>
+                        </div>
+                    )}
+
                 </form>
                 {message && <p className={message.includes('successfully') ? 'success-message' : 'error-message'}>{message}</p>}
             </div>

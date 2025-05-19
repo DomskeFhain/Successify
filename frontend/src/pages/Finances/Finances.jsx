@@ -5,32 +5,30 @@ import { useAuth } from "../../components/AuthContex/AuthContex";
 import { useApiErrorHandler } from "../../components/HandleApiError/HandleApiError";
 import FinancesTable from "../../components/FinancesTable/FinancesTable";
 import FinancesPieChart from "../../components/FinancesPieChart/FinancesPieChart";
+import FinancesPieChartIncome from "../../components/FinancesPieChart/FinancesPieChartIncome";
 import MenuItem from "@mui/material/MenuItem";
 import Select from "@mui/material/Select";
 import InputLabel from "@mui/material/InputLabel";
 import FormControl from "@mui/material/FormControl";
 import Button from "@mui/material/Button";
-import Dialog from "@mui/material/Dialog";
-import DialogTitle from "@mui/material/DialogTitle";
-import DialogContent from "@mui/material/DialogContent";
-import DialogActions from "@mui/material/DialogActions";
-import TextField from "@mui/material/TextField";
+import FinancesTableIncome from "../../components/FinancesTable/FinancesTableIncome";
+import AddExpenseDialog from "../../components/financesDialog/AddExpanseDialog";
+import AddIncomeDialog from "../../components/financesDialog/AddIncomeDialog";
 
 function Finances() {
   const { token } = useAuth();
   const handleError = useApiErrorHandler();
 
   const [finances, setFinances] = useState(null);
+  const [income, setIncome] = useState(null);
   const [month, setMonth] = useState(0);
   const [year, setYear] = useState(new Date().getFullYear());
   const [availableYears, setAvailableYears] = useState([]);
   const [availableMonths, setAvailableMonths] = useState([]);
-  const [open, setOpen] = useState(false);
-  const [addData, setAddData] = useState(null);
-  const [addErrorCategory, setAddErrorCategory] = useState(null);
-  const [addErrorCosts, setAddErrorCosts] = useState(null);
-  const [addErrorDate, setAddErrorDate] = useState(null);
+  const [openExpense, setOpenExpense] = useState(false);
+  const [openIncome, setOpenIncome] = useState(false);
   const [hasAutoSelectedMonth, setHasAutoSelectedMonth] = useState(false);
+  const [profit, setProfit] = useState(0);
 
   const MonthNames = {
     1: "January",
@@ -71,91 +69,29 @@ function Finances() {
     "Maintenance & Repairs",
   ];
 
-  // Add Entry
-
-  const handleAdd = () => {
-    let dateString;
-
-    if (
-      (month === 0 || month === new Date().getMonth() + 1) &&
-      year === new Date().getFullYear()
-    ) {
-      dateString = new Date().toISOString().split("T")[0];
-    } else {
-      if (month === 0) {
-        dateString = "";
-      } else {
-        const paddedMonth = month.toString().padStart(2, "0");
-        dateString = `${year}-${paddedMonth}-01`;
-      }
-    }
-
-    setAddData({ date: dateString, note: "" });
-    setOpen(true);
-  };
-
-  const handleClose = () => {
-    setOpen(false);
-    setAddData(null);
-    setAddErrorCosts(null);
-    setAddErrorCategory(null);
-    setAddErrorDate(null);
-  };
-
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setAddData((prevData) => ({
-      ...prevData,
-      [name]: value,
-    }));
-  };
-
-  const handleSave = async () => {
-    if (!addData?.category) {
-      return setAddErrorCategory("Please select a category!");
-    }
-
-    if (!addData?.costs || isNaN(addData.costs)) {
-      return setAddErrorCosts("Please enter a valid expense");
-    }
-    if (!addData?.date) {
-      return setAddErrorDate("Please enter a Date");
-    }
-
-    try {
-      await axios.post(`http://localhost:9000/finances`, addData, {
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-      });
-
-      handleClose();
-
-      const addedDate = new Date(addData.date);
-      const addedMonth = addedDate.getMonth() + 1;
-      const addedYear = addedDate.getFullYear();
-
-      if (month === 0 || (month === addedMonth && year === addedYear)) {
-        loadFinances();
-      }
-
-      if (!availableYears.includes(addedYear)) {
-        loadAvailableYears();
-      }
-
-      if (addedYear === year && !availableMonths.includes(addedMonth)) {
-        loadAvailableMonths();
-      } else {
-        loadAvailableMonths();
-      }
-      if (addedYear !== year && availableMonths.includes(addedMonth)) {
-        loadFinances();
-      }
-    } catch (error) {
-      handleError(error);
-    }
-  };
+  const incomeCategories = [
+    "Salary",
+    "Freelance",
+    "Business Income",
+    "Investments",
+    "Rental Income",
+    "Dividends",
+    "Interest",
+    "Pension",
+    "Social Security",
+    "Unemployment Benefits",
+    "Child Support",
+    "Alimony",
+    "Scholarships & Grants",
+    "Government Assistance",
+    "Bonuses",
+    "Commission",
+    "Royalties",
+    "Gifts Received",
+    "Tax Refunds",
+    "Sale of Assets",
+    "Side Hustle",
+  ];
 
   // Load Data
   // Monthly Finaces
@@ -184,18 +120,55 @@ function Finances() {
           },
         }
       );
-
       return setFinances(response.data);
     } catch (error) {
       if (error.response.status === 404) {
         setFinances(null);
         loadAvailableMonths();
-        setMonth(0);
+        loadAvailableYears();
       }
       handleError(error);
     }
   }
 
+  // Monthly Income
+
+  async function loadIncome() {
+    try {
+      if (month === 0) {
+        const response = await axios.get(
+          `http://localhost:9000/yearlyFinancesIncome?year=${year}`,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+
+        return setIncome(response.data);
+      }
+      const paddedMonth = month.toString().padStart(2, "0");
+      const lastDayOfMonth = new Date(year, month, 0).getDate();
+
+      const response = await axios.get(
+        `http://localhost:9000/monthlyFinancesIncome?startDate=${year}-${paddedMonth}-01&endDate=${year}-${paddedMonth}-${lastDayOfMonth}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      return setIncome(response.data);
+    } catch (error) {
+      if (error.response.status === 404) {
+        setIncome(null);
+        loadAvailableMonths();
+        loadAvailableYears();
+      }
+      handleError(error);
+    }
+  }
   // Load Available Years
 
   async function loadAvailableYears() {
@@ -277,7 +250,18 @@ function Finances() {
   // Load Finaces Overvies
   useEffect(() => {
     loadFinances();
+    loadIncome();
   }, [month, year]);
+
+  useEffect(() => {
+    const totalIncome = income
+      ? income.reduce((sum, income) => sum + income.income, 0)
+      : 0;
+    const totalExpanses = finances
+      ? finances.reduce((sum, expanse) => sum + expanse.costs, 0)
+      : 0;
+    setProfit(totalIncome - totalExpanses);
+  }, [finances, income]);
 
   return (
     <>
@@ -316,13 +300,29 @@ function Finances() {
             </FormControl>
           )}
         </div>
-        <div>
-          <Button variant="contained" color="primary" onClick={handleAdd}>
+        <div className="addButtons">
+          <Button
+            variant="contained"
+            color="primary"
+            onClick={() => {
+              setOpenExpense(true);
+            }}
+          >
             Add Expense
+          </Button>
+          <Button
+            variant="contained"
+            color="primary"
+            onClick={() => {
+              setOpenIncome(true);
+            }}
+          >
+            Add Income
           </Button>
         </div>
       </div>
       <div id="content">
+        <h1 className="topic">Expanses</h1>
         <div className="left">
           {finances ? (
             <FinancesPieChart finances={finances} months={month} />
@@ -347,72 +347,68 @@ function Finances() {
             <p>No Data available</p>
           )}
         </div>
+        <h1 className="topic">Income</h1>
+        <div className="left">
+          {income ? (
+            <FinancesPieChartIncome finances={income} months={month} />
+          ) : (
+            <p>No Data available</p>
+          )}
+        </div>
+        <div className="right">
+          {income ? (
+            <FinancesTableIncome
+              rows={income}
+              onUpdate={loadIncome}
+              categorys={incomeCategories}
+              year={year}
+              month={month}
+              availableMonths={availableMonths}
+              availableYears={availableYears}
+              loadAvailableMonths={loadAvailableMonths}
+              loadAvailableYears={loadAvailableYears}
+            />
+          ) : (
+            <p>No Data available</p>
+          )}
+        </div>
+        {profit > 0 ? (
+          <h1 className="topic" style={{ color: "green" }}>
+            Profit: {profit}€
+          </h1>
+        ) : (
+          <h1 className="topic" style={{ color: "red" }}>
+            Loss: {Math.abs(profit)}€
+          </h1>
+        )}
       </div>
-      <Dialog open={open} onClose={handleClose}>
-        <DialogTitle>Add Expense</DialogTitle>
-        <DialogContent
-          sx={{ display: "flex", flexDirection: "column", gap: 2, mt: 1 }}
-        >
-          <FormControl sx={{ minWidth: 200, marginTop: "0.5rem" }}>
-            <InputLabel>Category</InputLabel>
-            <Select
-              name="category"
-              label="Category"
-              value={addData?.category || ""}
-              onChange={(e) => {
-                handleChange(e);
-                if (e.target.value) setAddErrorCategory(null);
-              }}
-            >
-              {financeCategories.map((category, index) => (
-                <MenuItem key={index} value={category}>
-                  {category}
-                </MenuItem>
-              ))}
-            </Select>
-          </FormControl>
-          {addErrorCategory && (
-            <p style={{ color: "red", margin: 0 }}>{addErrorCategory}</p>
-          )}
-          <TextField
-            name="costs"
-            label="Expenses (€)"
-            type="number"
-            onChange={(e) => {
-              handleChange(e);
-              if (e.target.value) setAddErrorCosts(null);
-            }}
-          />
-          {addErrorCosts && (
-            <p style={{ color: "red", margin: 0 }}>{addErrorCosts}</p>
-          )}
-          <TextField
-            name="note"
-            label="Note - Optional"
-            value={addData?.note ?? ""}
-            onChange={handleChange}
-          />
-          <TextField
-            name="date"
-            label="Date"
-            type="date"
-            value={addData?.date}
-            onChange={handleChange}
-            InputLabelProps={{ shrink: true }}
-          />
-          {addErrorDate && (
-            <p style={{ color: "red", margin: 0 }}>{addErrorDate}</p>
-          )}
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={handleClose} color="primary">
-            Cancel
-          </Button>
-          <Button variant="contained" color="primary" onClick={handleSave}>
-            Add
-          </Button>
-        </DialogActions>
-      </Dialog>
+      <AddExpenseDialog
+        open={openExpense}
+        onClose={() => setOpenExpense(false)}
+        categories={financeCategories}
+        token={token}
+        updateFinances={loadFinances}
+        year={year}
+        updateYears={loadAvailableYears}
+        month={month}
+        updateMonths={loadAvailableMonths}
+        availableYears={availableYears}
+        availableMonths={availableMonths}
+      />
+
+      <AddIncomeDialog
+        open={openIncome}
+        onClose={() => setOpenIncome(false)}
+        categories={incomeCategories}
+        token={token}
+        updateIncome={loadIncome}
+        year={year}
+        updateYears={loadAvailableYears}
+        month={month}
+        updateMonths={loadAvailableMonths}
+        availableYears={availableYears}
+        availableMonths={availableMonths}
+      />
     </>
   );
 }
