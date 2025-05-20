@@ -15,9 +15,14 @@ import { alpha } from "@mui/material/styles";
 import FinancesTableIncome from "../../components/FinancesTable/FinancesTableIncome";
 import AddExpenseDialog from "../../components/financesDialog/AddExpanseDialog";
 import AddIncomeDialog from "../../components/financesDialog/AddIncomeDialog";
+import { useNavigate, useLocation } from "react-router-dom";
+import CircularProgress from "@mui/material/CircularProgress";
+import Box from "@mui/material/Box";
 
 function Finances() {
   const { token } = useAuth();
+  const navigate = useNavigate();
+  const location = useLocation();
   const handleError = useApiErrorHandler();
 
   const [finances, setFinances] = useState(null);
@@ -35,6 +40,9 @@ function Finances() {
   );
   const [filterCategory, setFilterCategory] = useState("");
   const [filtering, setFiltering] = useState(false);
+  const [initialLoading, setInitialLoading] = useState(true);
+  const [loadingExpanses, setLoadingExpanses] = useState(true);
+  const [loadingIncome, setLoadingIncome] = useState(true);
 
   const successifyBase = "#8B0000";
   const successifyMain = alpha(successifyBase, 0.7);
@@ -120,6 +128,8 @@ function Finances() {
               Authorization: `Bearer ${token}`,
             },
           });
+          setLoadingExpanses(false);
+          setInitialLoading(false);
           return setFinances(response.data);
         } else {
           const paddedMonth = month.toString().padStart(2, "0");
@@ -133,6 +143,8 @@ function Finances() {
               Authorization: `Bearer ${token}`,
             },
           });
+          setLoadingExpanses(false);
+          setInitialLoading(false);
           return setFinances(response.data);
         }
       }
@@ -147,7 +159,8 @@ function Finances() {
             Authorization: `Bearer ${token}`,
           },
         });
-
+        setLoadingExpanses(false);
+        setInitialLoading(false);
         return setFinances(response.data);
       }
       const paddedMonth = month.toString().padStart(2, "0");
@@ -164,10 +177,14 @@ function Finances() {
           Authorization: `Bearer ${token}`,
         },
       });
+      setLoadingExpanses(false);
+      setInitialLoading(false);
       return setFinances(response.data);
     } catch (error) {
       if (error.response.status === 404) {
         setFinances(null);
+        setInitialLoading(false);
+        setLoadingExpanses(false);
         loadAvailableMonths();
         loadAvailableYears();
       }
@@ -188,6 +205,7 @@ function Finances() {
               Authorization: `Bearer ${token}`,
             },
           });
+          setLoadingIncome(false);
           return setIncome(response.data);
         } else {
           const paddedMonth = month.toString().padStart(2, "0");
@@ -198,6 +216,7 @@ function Finances() {
               Authorization: `Bearer ${token}`,
             },
           });
+          setLoadingIncome(false);
           return setIncome(response.data);
         }
       }
@@ -210,7 +229,7 @@ function Finances() {
             },
           }
         );
-
+        setLoadingIncome(false);
         return setIncome(response.data);
       }
       const paddedMonth = month.toString().padStart(2, "0");
@@ -224,11 +243,12 @@ function Finances() {
           },
         }
       );
-
+      setLoadingIncome(false);
       return setIncome(response.data);
     } catch (error) {
       if (error.response.status === 404) {
         setIncome(null);
+        setLoadingIncome(false);
         loadAvailableMonths();
         loadAvailableYears();
       }
@@ -417,6 +437,15 @@ function Finances() {
     }
   };
 
+  // Filter Expanses
+
+  useEffect(() => {
+    if (!filtering) {
+      loadIncome();
+      loadAvailableMonths();
+    }
+  }, [filtering]);
+
   // Get available Years
   useEffect(() => {
     loadAvailableYears();
@@ -425,7 +454,7 @@ function Finances() {
   // Get Available Months
   useEffect(() => {
     loadAvailableMonths();
-  }, [year, filtering, month]);
+  }, [year, filtering, month, filterCategory]);
 
   // Get Available Categorys
 
@@ -458,6 +487,11 @@ function Finances() {
   }, [filterCategory]);
 
   useEffect(() => {
+    setLoadingExpanses(true);
+    setLoadingIncome(true);
+  }, [year, month, filterCategory]);
+
+  useEffect(() => {
     const totalIncome = income
       ? income.reduce((sum, income) => sum + income.income, 0)
       : 0;
@@ -468,9 +502,31 @@ function Finances() {
     setProfit(parseFloat(totalIncome - totalExpanses).toFixed(2));
   }, [finances, income]);
 
+  if (!token) {
+    const currentLocation = location.pathname;
+
+    navigate("/login", { state: { from: currentLocation } });
+    return;
+  }
+
+  if (initialLoading) {
+    return (
+      <Box
+        sx={{
+          display: "flex",
+          justifySelf: "center",
+          alignItems: "center",
+          height: "80vh",
+        }}
+      >
+        <CircularProgress sx={{ color: successifyBase }} />
+      </Box>
+    );
+  }
+
   return (
     <>
-      <div id="header">
+      <div id="header" className="fade-up">
         <div id="center">
           <h1>Finances Overview for</h1>
           {availableYears.length > 0 && (
@@ -558,70 +614,141 @@ function Finances() {
         </div>
       </div>
       <div id="content">
-        <h1 className="topic">Expanses</h1>
-        <div className="left">
-          {finances ? (
-            <FinancesPieChart finances={finances} months={month} />
-          ) : (
-            <p className="data">No Data available</p>
-          )}
-        </div>
-        <div className="right">
-          {finances ? (
-            <FinancesTable
-              rows={finances}
-              onUpdate={loadFinances}
-              categorys={financeCategories}
-              year={year}
-              month={month}
-              availableMonths={availableMonths}
-              availableYears={availableYears}
-              loadAvailableMonths={loadAvailableMonths}
-              loadAvailableYears={loadAvailableYears}
-              availableCategorys={availableExpanseCategorys}
-              updateCategorys={loadAvailableExpansesCategorys}
-            />
-          ) : (
-            <p className="data">No Data available</p>
-          )}
-        </div>
-        {!filtering && (
+        {finances || income ? (
           <>
-            <h1 className="topic">Income</h1>
-            <div className="left">
-              {income ? (
-                <FinancesPieChartIncome finances={income} months={month} />
+            <h1 className="topic fade-up">Expanses</h1>
+            <div className="left fade-left">
+              {loadingExpanses ? (
+                <Box
+                  sx={{
+                    display: "flex",
+                    justifySelf: "center",
+                    alignItems: "center",
+                    height: "4rem",
+                  }}
+                >
+                  <CircularProgress sx={{ color: successifyBase }} />
+                </Box>
               ) : (
-                <p className="data">No Data available</p>
+                <>
+                  {finances ? (
+                    <FinancesPieChart finances={finances} months={month} />
+                  ) : (
+                    <p className="data">no data</p>
+                  )}
+                </>
               )}
             </div>
-            <div className="right">
-              {income ? (
-                <FinancesTableIncome
-                  rows={income}
-                  onUpdate={loadIncome}
-                  categorys={incomeCategories}
-                  year={year}
-                  month={month}
-                  availableMonths={availableMonths}
-                  availableYears={availableYears}
-                  loadAvailableMonths={loadAvailableMonths}
-                  loadAvailableYears={loadAvailableYears}
-                />
+            <div className="right fade-left">
+              {loadingExpanses ? (
+                <Box
+                  sx={{
+                    display: "flex",
+                    justifySelf: "center",
+                    alignItems: "center",
+                    height: "4rem",
+                  }}
+                >
+                  <CircularProgress sx={{ color: successifyBase }} />
+                </Box>
               ) : (
-                <p className="data">No Data available</p>
+                <>
+                  {finances ? (
+                    <FinancesTable
+                      rows={finances}
+                      onUpdate={loadFinances}
+                      categorys={financeCategories}
+                      year={year}
+                      month={month}
+                      availableMonths={availableMonths}
+                      availableYears={availableYears}
+                      loadAvailableMonths={loadAvailableMonths}
+                      loadAvailableYears={loadAvailableYears}
+                      availableCategorys={availableExpanseCategorys}
+                      updateCategorys={loadAvailableExpansesCategorys}
+                    />
+                  ) : (
+                    <p className="data">no data</p>
+                  )}
+                </>
               )}
             </div>
-            {profit >= 0 ? (
-              <h1 className="topic" style={{ color: "green" }}>
-                Profit: {profit}€
-              </h1>
-            ) : (
-              <h1 className="topic" style={{ color: "red" }}>
-                Loss: {Math.abs(profit)}€
-              </h1>
+            {!filtering && (
+              <>
+                <h1 className="topic fade-up">Income</h1>
+                <div className="left fade-left">
+                  {loadingIncome ? (
+                    <Box
+                      sx={{
+                        display: "flex",
+                        justifySelf: "center",
+                        alignItems: "center",
+                        height: "4rem",
+                      }}
+                    >
+                      <CircularProgress sx={{ color: successifyBase }} />
+                    </Box>
+                  ) : (
+                    <>
+                      {income ? (
+                        <FinancesPieChartIncome
+                          finances={income}
+                          months={month}
+                        />
+                      ) : (
+                        <p className="data">no data</p>
+                      )}
+                    </>
+                  )}
+                </div>
+                <div className="right fade-left">
+                  {loadingIncome ? (
+                    <Box
+                      sx={{
+                        display: "flex",
+                        justifySelf: "center",
+                        alignItems: "center",
+                        height: "4rem",
+                      }}
+                    >
+                      <CircularProgress sx={{ color: successifyBase }} />
+                    </Box>
+                  ) : (
+                    <>
+                      {income ? (
+                        <FinancesTableIncome
+                          rows={income}
+                          onUpdate={loadIncome}
+                          categorys={incomeCategories}
+                          year={year}
+                          month={month}
+                          availableMonths={availableMonths}
+                          availableYears={availableYears}
+                          loadAvailableMonths={loadAvailableMonths}
+                          loadAvailableYears={loadAvailableYears}
+                        />
+                      ) : (
+                        <p className="data">no data</p>
+                      )}
+                    </>
+                  )}
+                </div>
+                {profit >= 0 ? (
+                  <h1 className="topic fade-up" style={{ color: "green" }}>
+                    Profit: {profit}€
+                  </h1>
+                ) : (
+                  <h1 className="topic fade-up" style={{ color: "red" }}>
+                    Loss: {Math.abs(profit)}€
+                  </h1>
+                )}
+              </>
             )}
           </>
+        ) : (
+          <div id="noData" className="fade-up">
+            <p className="data">no data</p>
+          </div>
         )}
       </div>
 
