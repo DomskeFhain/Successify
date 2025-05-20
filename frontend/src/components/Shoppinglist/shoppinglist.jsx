@@ -40,7 +40,7 @@ const ShoppingList = () => {
                     item: newItem,
                     quantity: quantity,
                     price: parseFloat(price) || 0,
-                    date: date,
+                    date: date || new Date().toISOString().split('T')[0],
                     completed: false
                 }, {
                     headers: {
