@@ -33,52 +33,52 @@ export default function Countdown() {
   const timerSeconds = seconds < 10 ? `0${seconds}` : seconds;
 
 
-useEffect(() => {
-  audioRef.current = new Audio("/alarm.mp3");
+  useEffect(() => {
+    audioRef.current = new Audio("/alarm.mp3");
 
-  if (isRunning) {
-    intervalRef.current = setInterval(() => {
-      setSeconds((prevSec) => {
-        if (prevSec === 0) {
-          
-          if (minutes > 0) {
-            setMinutes(prevMin => prevMin - 0.5);
-            return 59;
-          } else {
-            if (audioRef.current) audioRef.current.play();
-            
-            if (!displayMessage) {
-              setDisplayMessage(true); 
-              setMinutes(breakDuration); 
-              setSeconds(0);
+    if (isRunning) {
+      intervalRef.current = setInterval(() => {
+        setSeconds((prevSec) => {
+          if (prevSec === 0) {
+
+            if (minutes > 0) {
+              setMinutes(prevMin => prevMin - 0.5);
+              return 59;
             } else {
-              setCurrentCycle(prevCycle => {
-                const nextCycle = prevCycle + 0.5;
-                if (nextCycle >= totalCycles) {
-                  setIsRunning(false);
-                  setCycleCompleted(true);
-                  resetTimer();
-                  return prevCycle;
-                } else {
-                  setDisplayMessage(false);
-                  setMinutes(focusDuration);
-                  setSeconds(0);
-                  return nextCycle;
-                }
-              });
-            }
-            return 0;
-          }
-        }
-        return prevSec - 1;
-      });
-    }, 1000);
-  } else {
-    clearInterval(intervalRef.current);
-  }
+              if (audioRef.current) audioRef.current.play();
 
-  return () => clearInterval(intervalRef.current);
-}, [isRunning, displayMessage, focusDuration, breakDuration, minutes, totalCycles]);
+              if (!displayMessage) {
+                setDisplayMessage(true);
+                setMinutes(breakDuration);
+                setSeconds(0);
+              } else {
+                setCurrentCycle(prevCycle => {
+                  const nextCycle = prevCycle + 0.5;
+                  if (nextCycle >= totalCycles) {
+                    setIsRunning(false);
+                    setCycleCompleted(true);
+                    resetTimer();
+                    return prevCycle;
+                  } else {
+                    setDisplayMessage(false);
+                    setMinutes(focusDuration);
+                    setSeconds(0);
+                    return nextCycle;
+                  }
+                });
+              }
+              return 0;
+            }
+          }
+          return prevSec - 1;
+        });
+      }, 1000);
+    } else {
+      clearInterval(intervalRef.current);
+    }
+
+    return () => clearInterval(intervalRef.current);
+  }, [isRunning, displayMessage, focusDuration, breakDuration, minutes, totalCycles]);
 
 
   return (

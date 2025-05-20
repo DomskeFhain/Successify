@@ -61,13 +61,13 @@ function Profile() {
     const handleProfileChange = async (event) => {
         event.preventDefault();
 
-        if (!newPassword && newUsername === userData.username) {
-            setMessage("No new password or username has been entered.");
+        if (newUsername === userData.username && !newPassword) {
+            setMessage("No changes have been entered.");
             return;
         }
 
         if (newPassword && newPassword !== confirmPassword) {
-            setMessage('The passwords does not match');
+            setMessage('The passwords do not match');
             setNewPassword('');
             setConfirmPassword('');
             return;
@@ -106,7 +106,6 @@ function Profile() {
                 <form onSubmit={handleProfileChange} className="password-form">
                     <h3>Edit Username</h3>
                     <TextField
-                        required
                         label="Enter new username"
                         value={newUsername}
                         onChange={(event) => setNewUsername(event.target.value)}
@@ -124,7 +123,6 @@ function Profile() {
                         margin="normal"
                     />
                     <TextField
-                        required
                         type="password"
                         label="enter your new password"
                         value={newPassword}
@@ -133,7 +131,6 @@ function Profile() {
                         margin="normal"
                     />
                     <TextField
-                        required
                         type="password"
                         label="verify your new password"
                         value={confirmPassword}
@@ -142,7 +139,7 @@ function Profile() {
                         margin="normal"
                     />
                     <Box sx={{ display: 'flex', justifyContent: 'center', gap: 2, mt: 2 }}>
-                        <Button variant="contained" color="primary" type="submit">
+                        <Button sx={{ backgroundColor: "#8B0000", ":hover": { backgroundColor: "#b84545" } }} variant="contained" color="primary" type="submit">
                             confirm change
                         </Button>
                         <Button variant="outlined" color="error" onClick={() => setConfirmDeleteVisible(true)}>

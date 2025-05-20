@@ -7,9 +7,10 @@ import { useApiErrorHandler } from "../../components/HandleApiError/HandleApiErr
 const ShoppingList = () => {
     const [items, setItems] = useState([]);
     const [newItem, setNewItem] = useState('');
-    const [quantity, setQuantity] = useState(1);
+    const [quantity, setQuantity] = useState("");
     const [price, setPrice] = useState('');
     const [date, setDate] = useState(new Date().toISOString().split('T')[0]);
+    const [filterDate, setFilterDate] = useState('');
     const [error, setError] = useState('');
     const { token } = useAuth();
     const handleError = useApiErrorHandler();
@@ -143,10 +144,30 @@ const ShoppingList = () => {
         return items.reduce((total, item) => total + (item.price * item.quantity), 0);
     };
 
+    const filteredItems = filterDate
+        ? items.filter(item => item.date === filterDate)
+        : items;
+
     return (
         <div className="shopping-list-container">
             <h2>Shopping List</h2>
             {error && <p className="error-message">{error}</p>}
+            <div className="filter-container">
+                <input
+                    type="date"
+                    value={filterDate}
+                    onChange={(event) => setFilterDate(event.target.value)}
+                    className="date-filter-input"
+                />
+                {filterDate && (
+                    <button
+                        onClick={() => setFilterDate('')}
+                        className="clear-filter-button"
+                    >
+                        Clear Filter
+                    </button>
+                )}
+            </div>
             <form onSubmit={handleAddItem} className="shopping-list-form">
                 <div className="form-row">
                     <input
@@ -160,7 +181,7 @@ const ShoppingList = () => {
                         type="number"
                         value={quantity}
                         onChange={(event) => setQuantity(parseInt(event.target.value) || 1)}
-                        min="1"
+                        placeholder="Quantity"
                         className="quantity-input"
                     />
                     <div className="price-input-container">
@@ -185,7 +206,7 @@ const ShoppingList = () => {
                 </div>
             </form>
             <ul className="shopping-items">
-                {items.map(item => (
+                {filteredItems.map(item => (
                     <li key={item.id} className={`shopping-item ${item.completed ? 'completed' : ''}`}>
                         <input
                             type="checkbox"
@@ -198,7 +219,6 @@ const ShoppingList = () => {
                                 type="number"
                                 value={item.quantity}
                                 onChange={(event) => updateQuantity(item.id, parseInt(event.target.value))}
-                                min="1"
                                 className="quantity-input"
                             />
                             <div className="price-input-container">
@@ -223,7 +243,7 @@ const ShoppingList = () => {
                     </li>
                 ))}
             </ul>
-            {items.length > 0 && (
+            {filteredItems.length > 0 && (
                 <div className="shopping-list-total">
                     <h3>Total: {calculateTotal().toFixed(2)}€</h3>
                 </div>
