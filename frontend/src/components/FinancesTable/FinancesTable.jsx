@@ -124,14 +124,14 @@ export default function FinancesTable({
   };
 
   const columns = [
-    { field: "category", headerName: "Category", width: 150 },
-    { field: "note", headerName: "Note", width: 150 },
-    { field: "costs", headerName: "Expenses (€)", type: "number", width: 150 },
-    { field: "date", headerName: "Date", width: 150 },
+    { field: "category", headerName: "Category", width: 160 },
+    { field: "note", headerName: "Note", width: 160 },
+    { field: "costs", headerName: "Expenses (€)", type: "number", width: 160 },
+    { field: "date", headerName: "Date", width: 160 },
     {
       field: "edit",
       headerName: "",
-      width: 80,
+      width: 50,
       sortable: false,
       disableColumnMenu: true,
       renderCell: (params) =>
@@ -147,6 +147,7 @@ export default function FinancesTable({
     {
       field: "delete",
       headerName: "",
+      width: 50,
       sortable: false,
       disableColumnMenu: true,
       renderCell: (params) =>
@@ -180,7 +181,6 @@ export default function FinancesTable({
             color: "white",
 
             "& .MuiDataGrid-columnHeader": {
-              display: "flex",
               alignItems: "center",
               justifyContent: "center",
             },
@@ -214,6 +214,9 @@ export default function FinancesTable({
             },
             "& .MuiTablePagination-root": {
               color: "white",
+              justifyContent: "center",
+              alignContent: "center",
+              height: 61,
             },
             "& .MuiTablePagination-toolbar": {
               color: "white",
@@ -225,6 +228,7 @@ export default function FinancesTable({
             "& .MuiTablePagination-select": {
               color: "white",
             },
+            width: 750,
           }}
         />
       </Paper>
