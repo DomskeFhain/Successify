@@ -7,7 +7,7 @@ import { useApiErrorHandler } from "../../components/HandleApiError/HandleApiErr
 const ShoppingList = () => {
     const [items, setItems] = useState([]);
     const [newItem, setNewItem] = useState('');
-    const [quantity, setQuantity] = useState(1);
+    const [quantity, setQuantity] = useState("");
     const [price, setPrice] = useState('');
     const [date, setDate] = useState(new Date().toISOString().split('T')[0]);
     const [filterDate, setFilterDate] = useState('');
@@ -144,7 +144,7 @@ const ShoppingList = () => {
         return items.reduce((total, item) => total + (item.price * item.quantity), 0);
     };
 
-    const filteredItems = filterDate 
+    const filteredItems = filterDate
         ? items.filter(item => item.date === filterDate)
         : items;
 
@@ -160,7 +160,7 @@ const ShoppingList = () => {
                     className="date-filter-input"
                 />
                 {filterDate && (
-                    <button 
+                    <button
                         onClick={() => setFilterDate('')}
                         className="clear-filter-button"
                     >
@@ -181,7 +181,7 @@ const ShoppingList = () => {
                         type="number"
                         value={quantity}
                         onChange={(event) => setQuantity(parseInt(event.target.value) || 1)}
-                        min="1"
+                        placeholder="Quantity"
                         className="quantity-input"
                     />
                     <div className="price-input-container">
@@ -219,7 +219,6 @@ const ShoppingList = () => {
                                 type="number"
                                 value={item.quantity}
                                 onChange={(event) => updateQuantity(item.id, parseInt(event.target.value))}
-                                min="1"
                                 className="quantity-input"
                             />
                             <div className="price-input-container">
