@@ -11,9 +11,9 @@ import Avatar from '@mui/material/Avatar';
 import Button from '@mui/material/Button';
 import Tooltip from '@mui/material/Tooltip';
 import MenuItem from '@mui/material/MenuItem';
-import AdbIcon from '@mui/icons-material/Adb';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../AuthContex/AuthContex';
+import logo from '../../assets/logo-v2.png';
 
 const pages = [{ name: "Scheduler", link: "/scheduler" }, { name: "Finances", link: "/finances" }, { name: "Shopping-List", link: "/shoppinglist" }, { name: "To-Do", link: "/todo" }];
 
@@ -42,29 +42,23 @@ function Navbar() {
 
 
   return (
-    <AppBar position="static" sx={{ backgroundColor: "rgb(114, 114, 114)" }}>
+    <AppBar position="static" sx={{ backgroundColor: "white" }}>
       <Container maxWidth="xl">
         <Toolbar disableGutters>
-          <AdbIcon onClick={() => { navigate("/") }} sx={{ display: { xs: 'none', md: 'flex' }, mr: 1, cursor: 'pointer', }} />
-          <Typography onClick={() => { navigate("/") }}
-            variant="h6"
-            noWrap
-            component="a"
-            sx={{
-              mr: 2,
-              display: { xs: 'none', md: 'flex' },
-              fontFamily: 'monospace',
-              fontWeight: 700,
-              letterSpacing: '.3rem',
-              color: 'inherit',
-              textDecoration: 'none',
-              cursor: 'pointer',
-            }}
-          >
-
-            SUCCESSIFY
-          </Typography>
-
+          <img
+            src={logo}
+            alt="Logo"
+            onClick={() => { navigate("/") }}
+            className="navbar-logo-desktop"
+            style={{ height: '80px', marginRight: '8px', cursor: 'pointer', display: 'none' }}
+          />
+          <img
+            src={logo}
+            alt="Logo"
+            onClick={() => { navigate("/") }}
+            className="navbar-logo-mobile"
+            style={{ height: '80px', marginRight: '8px', cursor: 'pointer', display: 'flex' }}
+          />
           <Box sx={{ flexGrow: 1, display: { xs: 'flex', md: 'none' } }}>
             <IconButton
               size="large"
@@ -72,7 +66,7 @@ function Navbar() {
               aria-controls="menu-appbar"
               aria-haspopup="true"
               onClick={handleOpenNavMenu}
-              color="inherit"
+              sx={{ color: '#8B0000' }}
             >
               <MenuIcon />
             </IconButton>
@@ -99,31 +93,12 @@ function Navbar() {
               ))}
             </Menu>
           </Box>
-          <AdbIcon onClick={() => { navigate("/") }} sx={{ display: { xs: 'flex', md: 'none' }, mr: 1, cursor: "pointer" }} />
-          <Typography onClick={() => { navigate("/") }}
-            variant="h5"
-            noWrap
-            component="a"
-            sx={{
-              mr: 2,
-              display: { xs: 'flex', md: 'none' },
-              flexGrow: 1,
-              fontFamily: 'monospace',
-              fontWeight: 700,
-              letterSpacing: '.3rem',
-              color: 'inherit',
-              textDecoration: 'none',
-              cursor: "pointer"
-            }}
-          >
-            SUCCESSIFY
-          </Typography>
           <Box sx={{ flexGrow: 1, display: { xs: 'none', md: 'flex' } }}>
             {pages.map((page) => (
               <Button
                 key={page.name}
                 onClick={() => { handleCloseNavMenu(); navigate(page.link) }}
-                sx={{ my: 2, color: 'white', display: 'block' }}
+                sx={{ my: 2, color: '#8B0000', display: 'block' }}
               >
                 {page.name}
               </Button>
@@ -152,7 +127,7 @@ function Navbar() {
                 onClose={handleCloseUserMenu}
               >
 
-                <MenuItem key="Profile" onClick={handleCloseUserMenu}>
+                <MenuItem key="Profile" onClick={() => { handleCloseUserMenu(); navigate('/profile'); }}>
                   <Typography sx={{ textAlign: 'center' }}>Profile</Typography>
                 </MenuItem>
                 <MenuItem key="Logout" onClick={() => { handleCloseUserMenu(); logout(); navigate('/'); }}>
@@ -161,10 +136,10 @@ function Navbar() {
 
               </Menu></>) : (
               <>
-                <Button onClick={() => navigate("/register")} sx={{ color: 'white', display: { xs: 'flex', md: 'flex' } }}>
+                <Button onClick={() => navigate("/register")} sx={{ color: '#8B0000', display: { xs: 'flex', md: 'flex' } }}>
                   Register
                 </Button>
-                <Button onClick={() => navigate("/login")} sx={{ color: 'white', display: { xs: 'flex', md: 'flex' } }}>
+                <Button onClick={() => navigate("/login")} sx={{ color: '#8B0000', display: { xs: 'flex', md: 'flex' } }}>
                   Login
                 </Button>
               </>

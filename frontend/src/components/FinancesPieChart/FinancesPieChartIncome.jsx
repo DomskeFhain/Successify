@@ -1,38 +1,38 @@
 import React from "react";
 import { PieChart } from "@mui/x-charts/PieChart";
 
-const FinancesPieChart = ({ finances, months }) => {
+const FinancesPieChartIncome = ({ finances, months }) => {
   const colors = {
-    Rent: "#FF6384",
-    Groceries: "#36A2EB",
-    Insurance: "#FFCE56",
-    Transportation: "#4BC0C0",
-    Leisure: "#9966FF",
-    Health: "#FF9F40",
-    Clothing: "#8B0000",
-    Household: "#FF6666",
-    Communication: "#66B2FF",
-    Education: "#CC99FF",
-    Travel: "#FFCC99",
-    Miscellaneous: "#C0C0C0",
-    Utilities: "#669999",
-    Subscriptions: "#FF99CC",
-    "Dining Out": "#99FFCC",
-    Childcare: "#FFB347",
-    "Debt Repayment": "#B19CD9",
-    Pets: "#FF7F50",
-    "Gifts & Donations": "#90EE90",
-    Entertainment: "#FFD700",
-    "Maintenance & Repairs": "#A52A2A",
+    Salary: "#4CAF50",
+    Freelance: "#2196F3",
+    "Business Income": "#FF9800",
+    Investments: "#9C27B0",
+    "Rental Income": "#3F51B5",
+    Dividends: "#00BCD4",
+    Interest: "#8BC34A",
+    Pension: "#FFC107",
+    "Social Security": "#E91E63",
+    "Unemployment Benefits": "#795548",
+    "Child Support": "#CDDC39",
+    Alimony: "#FF5722",
+    "Scholarships & Grants": "#673AB7",
+    "Government Assistance": "#03A9F4",
+    Bonuses: "#F44336",
+    Commission: "#009688",
+    Royalties: "#FFEB3B",
+    "Gifts Received": "#607D8B",
+    "Tax Refunds": "#AED581",
+    "Sale of Assets": "#BA68C8",
+    "Side Hustle": "#F06292",
   };
 
   const summedCategory = finances
     .reduce((sc, element) => {
       const existing = sc.find((item) => item.label === element.category);
       if (existing) {
-        existing.value += element.costs;
+        existing.value += element.income;
       } else {
-        sc.push({ label: element.category, value: element.costs });
+        sc.push({ label: element.category, value: element.income });
       }
       return sc;
     }, [])
@@ -83,4 +83,4 @@ const FinancesPieChart = ({ finances, months }) => {
   );
 };
 
-export default FinancesPieChart;
+export default FinancesPieChartIncome;

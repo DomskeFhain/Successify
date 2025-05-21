@@ -25,7 +25,7 @@ function Register() {
     try {
       await axios.post("http://localhost:9000/users", { username, password });
       alert("Registration was Successful");
-      navigate("/");
+      navigate("/login");
     } catch (error) {
       if (error.response) {
         console.log(error.response.data);
@@ -80,7 +80,13 @@ function Register() {
             value={repeatPassword}
             margin="normal"
           />
-          <Button variant="contained" color="primary" type="submit">
+          <Button sx={{
+            backgroundColor: "#8B0000",
+            color: 'white',
+            '&:hover': {
+              backgroundColor: '#ac2727',
+            }
+          }} variant="contained" color="primary" type="submit">
             Register
           </Button>
           {message && <p style={{ color: "red" }}>{message}</p>}

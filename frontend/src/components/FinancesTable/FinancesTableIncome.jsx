@@ -20,7 +20,7 @@ import MenuItem from "@mui/material/MenuItem";
 import { useState } from "react";
 import { alpha } from "@mui/material/styles";
 
-export default function FinancesTable({
+export default function FinancesTableIncome({
   rows,
   onUpdate,
   categorys,
@@ -30,8 +30,6 @@ export default function FinancesTable({
   availableYears,
   loadAvailableMonths,
   loadAvailableYears,
-  availableCategorys,
-  updateCategorys,
 }) {
   const { token } = useAuth();
   const [editData, setEditData] = useState(null);
@@ -67,12 +65,13 @@ export default function FinancesTable({
       financeId: editData.id,
       newCategory: editData.category,
       newNote: editData?.note || "",
-      newCosts: editData.costs,
+      newIncome: editData.income,
       newDate: editData.date,
     };
 
     try {
-      await axios.put(`http://localhost:9000/finances`, newData, {
+      console.log(newData);
+      await axios.put(`http://localhost:9000/financesIncome`, newData, {
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
@@ -97,9 +96,6 @@ export default function FinancesTable({
 
       if (isAllSelected || (isSameYear && isSameMonth)) {
         await onUpdate();
-        if (!availableCategorys.includes(editData.category)) {
-          await updateCategorys();
-        }
       }
 
       if (onUpdate) onUpdate();
@@ -111,13 +107,11 @@ export default function FinancesTable({
 
   const handleDelete = async (id) => {
     try {
-      await axios.delete(`http://localhost:9000/finances/${id}`, {
+      await axios.delete(`http://localhost:9000/financesIncome/${id}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
 
       if (onUpdate) onUpdate();
-
-      updateCategorys();
     } catch (error) {
       handleError(error);
     }
@@ -126,7 +120,7 @@ export default function FinancesTable({
   const columns = [
     { field: "category", headerName: "Category", width: 160 },
     { field: "note", headerName: "Note", width: 160 },
-    { field: "costs", headerName: "Expenses (€)", type: "number", width: 160 },
+    { field: "income", headerName: "Income (€)", type: "number", width: 160 },
     { field: "date", headerName: "Date", width: 160 },
     {
       field: "edit",
@@ -254,10 +248,10 @@ export default function FinancesTable({
             </Select>
           </FormControl>
           <TextField
-            name="costs"
-            label="Expanses (€)"
+            name="income"
+            label="Income (€)"
             type="number"
-            value={editData?.costs || ""}
+            value={editData?.income || ""}
             onChange={handleChange}
           />
           <TextField

@@ -14,8 +14,14 @@ const usersRoutes = require("./routes/users");
 app.use(usersRoutes);
 
 // Finances
-const finacesRoutes = require("./routes/finances");
-app.use(finacesRoutes);
+// Expanses
+const financesRoutes = require("./routes/finances");
+app.use(financesRoutes);
+
+// Income
+
+const financesIncomeRoutes = require("./routes/financesIncome");
+app.use(financesIncomeRoutes);
 
 // scheduler
 const schedulerRoutes = require("./routes/scheduler");
@@ -26,8 +32,8 @@ const shoppinglistRoutes = require("./routes/shoppinglist");
 app.use(shoppinglistRoutes);
 
 // To-Do
-const todolistRoutes = require("./routes/todolist");
-app.use(todolistRoutes);
+const todoRoutes = require("./routes/todolist");
+app.use(todoRoutes);
 
 app.listen(port, () => {
   console.log(`Server läuft auf Port ${port}`);

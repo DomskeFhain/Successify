@@ -69,7 +69,14 @@ function Login() {
             value={password}
             margin="normal"
           />
-          <Button variant="contained" color="primary" type="submit">
+          <Button sx={{
+            backgroundColor: "#8B0000",
+            color: 'white',
+            '&:hover': {
+              backgroundColor: '#ac2727',
+            }
+          }
+          } variant="contained" color="primary" type="submit">
             Login
           </Button>
           {message && <p style={{ color: "red" }}>{message}</p>}

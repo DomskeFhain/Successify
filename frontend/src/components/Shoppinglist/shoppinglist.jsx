@@ -2,20 +2,18 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import './shoppinglist.css';
 import { useAuth } from '../../components/AuthContex/AuthContex';
-import { useNavigate } from 'react-router-dom';
-import { useApiErrorHandler } from "../HandleApiError/HandleApiError";
-
+import { useApiErrorHandler } from "../../components/HandleApiError/HandleApiError";
 
 const ShoppingList = () => {
     const [items, setItems] = useState([]);
     const [newItem, setNewItem] = useState('');
-    const [quantity, setQuantity] = useState(1);
+    const [quantity, setQuantity] = useState("");
     const [price, setPrice] = useState('');
     const [date, setDate] = useState(new Date().toISOString().split('T')[0]);
+    const [filterDate, setFilterDate] = useState('');
     const [error, setError] = useState('');
-    const { token, logout } = useAuth();
+    const { token } = useAuth();
     const handleError = useApiErrorHandler();
-
     const fetchShoppingList = async () => {
         try {
             const response = await axios.get('http://localhost:9000/shoppinglist', {
@@ -42,7 +40,8 @@ const ShoppingList = () => {
                     item: newItem,
                     quantity: quantity,
                     price: parseFloat(price) || 0,
-                    date: date
+                    date: date || new Date().toISOString().split('T')[0],
+                    completed: false
                 }, {
                     headers: {
                         'Authorization': `Bearer ${token}`
@@ -74,17 +73,39 @@ const ShoppingList = () => {
         }
     };
 
-    const toggleComplete = (id) => {
-        setItems(items.map(item =>
-            item.id === id ? { ...item, completed: !item.completed } : item
-        ));
+    const toggleComplete = async (id) => {
+        const currentItem = items.find(item => item.id === id);
+        if (currentItem) {
+            try {
+                await axios.put(`http://localhost:9000/shoppinglist/${id}`, {
+                    item: currentItem.item,
+                    quantity: currentItem.quantity,
+                    price: currentItem.price,
+                    date: currentItem.date,
+                    completed: !currentItem.completed
+                }, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+
+                    }
+                });
+                fetchShoppingList();
+            } catch (error) {
+                handleError(error);
+            }
+        }
     };
 
     const updateQuantity = async (id, newQuantity) => {
+        const currentItem = items.find(item => item.id === id);
         if (newQuantity > 0) {
             try {
                 await axios.put(`http://localhost:9000/shoppinglist/${id}`, {
-                    quantity: newQuantity
+                    item: currentItem.item,
+                    quantity: newQuantity,
+                    price: currentItem.price,
+                    date: currentItem.date,
+                    completed: currentItem.completed
                 }, {
                     headers: {
                         'Authorization': `Bearer ${token}`
@@ -99,9 +120,14 @@ const ShoppingList = () => {
     };
 
     const updatePrice = async (id, newPrice) => {
+        const currentItem = items.find(item => item.id === id);
         try {
             await axios.put(`http://localhost:9000/shoppinglist/${id}`, {
-                price: parseFloat(newPrice) || 0
+                item: currentItem.item,
+                quantity: currentItem.quantity,
+                price: parseFloat(newPrice) || 0,
+                date: currentItem.date,
+                completed: currentItem.completed
             }, {
                 headers: {
                     'Authorization': `Bearer ${token}`
@@ -118,10 +144,30 @@ const ShoppingList = () => {
         return items.reduce((total, item) => total + (item.price * item.quantity), 0);
     };
 
+    const filteredItems = filterDate
+        ? items.filter(item => item.date === filterDate)
+        : items;
+
     return (
         <div className="shopping-list-container">
             <h2>Shopping List</h2>
             {error && <p className="error-message">{error}</p>}
+            <div className="filter-container">
+                <input
+                    type="date"
+                    value={filterDate}
+                    onChange={(event) => setFilterDate(event.target.value)}
+                    className="date-filter-input"
+                />
+                {filterDate && (
+                    <button
+                        onClick={() => setFilterDate('')}
+                        className="clear-filter-button"
+                    >
+                        Clear Filter
+                    </button>
+                )}
+            </div>
             <form onSubmit={handleAddItem} className="shopping-list-form">
                 <div className="form-row">
                     <input
@@ -135,7 +181,7 @@ const ShoppingList = () => {
                         type="number"
                         value={quantity}
                         onChange={(event) => setQuantity(parseInt(event.target.value) || 1)}
-                        min="1"
+                        placeholder="Quantity"
                         className="quantity-input"
                     />
                     <div className="price-input-container">
@@ -160,7 +206,7 @@ const ShoppingList = () => {
                 </div>
             </form>
             <ul className="shopping-items">
-                {items.map(item => (
+                {filteredItems.map(item => (
                     <li key={item.id} className={`shopping-item ${item.completed ? 'completed' : ''}`}>
                         <input
                             type="checkbox"
@@ -173,7 +219,6 @@ const ShoppingList = () => {
                                 type="number"
                                 value={item.quantity}
                                 onChange={(event) => updateQuantity(item.id, parseInt(event.target.value))}
-                                min="1"
                                 className="quantity-input"
                             />
                             <div className="price-input-container">
@@ -198,7 +243,7 @@ const ShoppingList = () => {
                     </li>
                 ))}
             </ul>
-            {items.length > 0 && (
+            {filteredItems.length > 0 && (
                 <div className="shopping-list-total">
                     <h3>Total: {calculateTotal().toFixed(2)}€</h3>
                 </div>
