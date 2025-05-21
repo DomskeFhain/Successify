@@ -17,7 +17,7 @@ function Home() {
           Mit Successify haben Sie alle wichtigen Tools an einem Ort:
         </p>
         <ul className="features-list">
-          <Link to="/sceduler" className="feature-link">
+          <Link to="/scheduler" className="feature-link">
             <li>📅 Terminkalender: Organisieren Sie Ihren Alltag effizient</li>
           </Link>
           <Link to="/shoppinglist" className="feature-link">
