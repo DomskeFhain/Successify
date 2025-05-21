@@ -1,9 +1,7 @@
 .todo {
     margin: 2rem auto;
     padding: 2rem;
-    background-color: #d9d9d9;
     border-radius: 8px;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -28,12 +26,13 @@
     margin-bottom: 0.5rem;
     border-radius: 6px;
     border: 1px solid #ccc;
+
 }
 
 .dropdown-container {
     margin: 1rem auto;
     padding: 1rem;
-    background-color: #d9d9d9;
+
     border-radius: 8px;
     display: flex;
     flex-direction: column;
@@ -49,6 +48,7 @@
     width: 100%;
     max-width: 400px;
     margin-bottom: 1rem;
+    background-color: white;
 
 }
 
@@ -63,7 +63,6 @@
 
 .tasksContainer p:hover {
     background-color: #f5f5f5;
-    transition: background-color 0.2s ease;
 }
 
 .tasksContainer input[type="text"] {
@@ -82,6 +81,7 @@
   align-items: center;
   gap: 0.5rem;
   margin-bottom: 1rem;
+
 }
 
 .task-input-group input {
@@ -95,6 +95,7 @@
 
 p {
     font-size: 20px;
+    
 }
 
 .edit-buttons button,
@@ -103,3 +104,4 @@ p {
     margin: 0 0.5rem;
     margin-bottom: 0.5rem;
 }
+
