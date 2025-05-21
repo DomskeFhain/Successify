@@ -264,12 +264,17 @@ function Finances() {
           Authorization: `Bearer ${token}`,
         },
       });
+      const todayYear = new Date().getFullYear();
 
       if (response.data.length === 0) {
-        const todayYear = new Date().getFullYear();
         return setAvailableYears([todayYear]);
       }
       const availableYearsArray = response.data.map((year) => year.years);
+
+      if (!availableYearsArray.includes(todayYear.toString())) {
+        availableYearsArray.push(todayYear.toString());
+        availableYearsArray.sort((a, b) => b - a);
+      }
       return setAvailableYears(availableYearsArray);
     } catch (error) {
       handleError(error);

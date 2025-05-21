@@ -1,12 +1,15 @@
-import React, { useState, useEffect } from 'react';
-import { useAuth } from '../../components/AuthContex/AuthContex';
-import axios from 'axios';
-import './todo.css';
+import React, { useState, useEffect } from "react";
+import { useAuth } from "../../components/AuthContex/AuthContex";
+import axios from "axios";
+import "./todo.css";
 import { useApiErrorHandler } from "../../components/HandleApiError/HandleApiError";
-import Button from '@mui/material/Button';
+import Button from "@mui/material/Button";
+import { useNavigate, useLocation } from "react-router-dom";
 
 function Todo() {
   const handleError = useApiErrorHandler();
+  const navigate = useNavigate();
+  const location = useLocation();
   const { token } = useAuth();
   const [lists, setLists] = useState([]);
   const [newListName, setNewListName] = useState("");
@@ -17,7 +20,6 @@ function Todo() {
   const [newTaskName, setNewTaskName] = useState("");
   const [editTaskId, setEditTaskId] = useState(null);
   const [editTaskName, setEditTaskName] = useState("");
-  
 
   const axiosAuth = axios.create({
     baseURL: "http://localhost:9000",
@@ -26,9 +28,9 @@ function Todo() {
     },
   });
 
-//functions
+  //functions
 
-// list routes x functions
+  // list routes x functions
 
   const getList = async () => {
     try {
@@ -49,35 +51,39 @@ function Todo() {
     }
   };
 
-const updateList = async () => {
-  try {
-    await axiosAuth.put(`/todolist/${editListId}`, { listName: editListName });
-    setLists(prevLists =>
-      prevLists.map(list =>
-        list.listID === editListId ? { ...list, listName: editListName } : list
-      )
-    );
-    setEditListName("");
-    setEditMode(false);
-  } catch (error) {
-    handleError(error);
-  }
-};
+  const updateList = async () => {
+    try {
+      await axiosAuth.put(`/todolist/${editListId}`, {
+        listName: editListName,
+      });
+      setLists((prevLists) =>
+        prevLists.map((list) =>
+          list.listID === editListId
+            ? { ...list, listName: editListName }
+            : list
+        )
+      );
+      setEditListName("");
+      setEditMode(false);
+    } catch (error) {
+      handleError(error);
+    }
+  };
 
-const deleteList = async (listID) => {
-  try {
-    await axiosAuth.delete(`/todolist/${listID}`);
-    setEditListId(null);
-    setEditListName("");
-    setTasks([]);
-    setEditMode(false);
-    getList();
-  } catch (error) {
-    handleError(error);
-  }
-};
+  const deleteList = async (listID) => {
+    try {
+      await axiosAuth.delete(`/todolist/${listID}`);
+      setEditListId(null);
+      setEditListName("");
+      setTasks([]);
+      setEditMode(false);
+      getList();
+    } catch (error) {
+      handleError(error);
+    }
+  };
 
-// Task Routes x Functions
+  // Task Routes x Functions
 
   const getTask = async (listID) => {
     try {
@@ -107,197 +113,245 @@ const deleteList = async (listID) => {
     }
   };
 
-const updateTask = async (taskID) => {
-  try {
-    await axiosAuth.put(`/tasks/${taskID}`, { taskName: editTaskName });
-    setTasks(prevTasks =>
-      prevTasks.map(task =>
-        task.taskID === taskID ? { ...task, taskName: editTaskName } : task
-      )
-    );
+  const updateTask = async (taskID) => {
+    try {
+      await axiosAuth.put(`/tasks/${taskID}`, { taskName: editTaskName });
+      setTasks((prevTasks) =>
+        prevTasks.map((task) =>
+          task.taskID === taskID ? { ...task, taskName: editTaskName } : task
+        )
+      );
 
-    setEditTaskName("");
-    setEditTaskId(null);
-  } catch (error) {
-    handleError(error);
-  }
-};
+      setEditTaskName("");
+      setEditTaskId(null);
+    } catch (error) {
+      handleError(error);
+    }
+  };
 
-const toggleEditDoneTask = async (taskID, doneStatus) => {
-  try {
-    const newStatus = doneStatus === 0 ? 1 : 0;
-    await axiosAuth.put(`/tasks/${taskID}`, { taskDone: newStatus });
+  const toggleEditDoneTask = async (taskID, doneStatus) => {
+    try {
+      const newStatus = doneStatus === 0 ? 1 : 0;
+      await axiosAuth.put(`/tasks/${taskID}`, { taskDone: newStatus });
 
-    setTasks(prevTasks =>
-      prevTasks.map(task =>
-        task.taskID === taskID ? { ...task, done: newStatus } : task
-      )
-    );
-  } catch (error) {
-    handleError(error);
-  }
-};
+      setTasks((prevTasks) =>
+        prevTasks.map((task) =>
+          task.taskID === taskID ? { ...task, done: newStatus } : task
+        )
+      );
+    } catch (error) {
+      handleError(error);
+    }
+  };
 
-const handleDeleteTask = async (taskID) => {
-  await deleteTask(taskID);
-  getTask(editListId);
-};
+  const handleDeleteTask = async (taskID) => {
+    await deleteTask(taskID);
+    getTask(editListId);
+  };
 
-// render
+  // render
 
   useEffect(() => {
     getList();
   }, []);
 
+  if (!token) {
+    const currentLocation = location.pathname;
+
+    navigate("/login", { state: { from: currentLocation } });
+    return;
+  }
+
   return (
-<div className="todo">
-  <div className="new-list">
-    <input
-      type="text"
-      placeholder="Neue Liste eingeben"
-      value={newListName}
-      onChange={(e) => setNewListName(e.target.value)}
-      onKeyDown={(e) => e.key === "Enter" && postList()}
-    />
-    <Button 
-    variant='outlined'
-    color="red"
-    size="small"
-    onClick={postList}>Hinzufügen</Button>
-  </div>
-
-  {lists.length > 0 && (
-    <div className="dropdown-container">
-      <select
-  onChange={(e) => {
-    const selectedId = parseInt(e.target.value);
-    const selectedList = lists.find((list) => list.listID === selectedId);
-    setEditListId(selectedList.listID);
-    setEditListName(selectedList.listName);
-    getTask(selectedId);
-  }}
-  value={editListId || ""}
->
-  <option value="" disabled>Liste auswählen</option>
-  {lists.map((list) => (
-    <option key={list.listID} value={list.listID}>
-      {list.listName}
-    </option>
-  ))}
-</select>
-      {editListId && (
-        <>
-          <div className="edit-buttons">
-            <Button 
-            variant='outlined'
-              color="red"
-              size="small"
-              onClick={() => setEditMode(true)}>Bearbeiten</Button>
-            <Button 
-            variant='outlined'
-            color='red'
-            size='small'
-            onClick={() => deleteList(editListId)}>Löschen</Button>
-          </div>
-        
-
-          {editMode && (
-            <div className="edit-controls">
-              <input
-                type="text"
-                value={editListName}
-                onChange={(e) => setEditListName(e.target.value)}
-              />
-              <Button
-              variant='outlined'
-                color="red"
-                size="small"
-                onClick={() => {
-                  updateList();
-                  setEditMode(false);
-                }}
-              >
-                Speichern
-              </Button>
-              <Button 
-              variant='outlined'
-              color='red'
-              size='small'
-              onClick={() => setEditMode(false)}>Abbrechen</Button>
-            </div>
-          )}
-      <div className="task-input-group">
-          <input
+    <div className="todo">
+      <div className="new-list">
+        <input
           type="text"
-          placeholder="Neuer Eintrag eingeben"
-          value={newTaskName}
-          onChange={(e) => setNewTaskName(e.target.value)}
-          onKeyDown={(e) => e.key === "Enter" && postTask(editListId) && getTask(editListId)}
-          />
-          <Button 
-          variant='outlined'
-            color='red'
-            size='small'
-            onClick={() => {postTask(editListId); getTask(editListId)}}
-          >
+          placeholder="Neue Liste eingeben"
+          value={newListName}
+          onChange={(e) => setNewListName(e.target.value)}
+          onKeyDown={(e) => e.key === "Enter" && postList()}
+        />
+        <Button variant="outlined" color="red" size="small" onClick={postList}>
           Hinzufügen
-          </Button>
+        </Button>
       </div>
-      
-      <ul>
-        {tasks.map((task) => (
-          <p key={task.taskID} style={task.done ? {textDecoration: "line-through"} : {textDecoration: "none"}}>
-            {task.taskName}
-            <input type="checkbox" onChange={() => toggleEditDoneTask(task.taskID, task.done)} checked={task.done}/>
-            <div className="edit-buttons">
-            <Button 
-            variant='outlined'
-            color="red"
-            size="small"
-            onClick={() => {
-            setEditTaskId(task.taskID);
-            setEditTaskName(task.taskName);}}>Bearbeiten</Button>
-            <Button
-            variant='outlined' 
-            color="red"
-            size="small"
-            onClick={() => handleDeleteTask(task.taskID)}>Löschen</Button>
-            </div>
 
-            {editTaskId === task.taskID && (
-              <div className="edit-controls">
+      {lists.length > 0 && (
+        <div className="dropdown-container">
+          <select
+            onChange={(e) => {
+              const selectedId = parseInt(e.target.value);
+              const selectedList = lists.find(
+                (list) => list.listID === selectedId
+              );
+              setEditListId(selectedList.listID);
+              setEditListName(selectedList.listName);
+              getTask(selectedId);
+            }}
+            value={editListId || ""}
+          >
+            <option value="" disabled>
+              Liste auswählen
+            </option>
+            {lists.map((list) => (
+              <option key={list.listID} value={list.listID}>
+                {list.listName}
+              </option>
+            ))}
+          </select>
+          {editListId && (
+            <>
+              <div className="edit-buttons">
+                <Button
+                  variant="outlined"
+                  color="red"
+                  size="small"
+                  onClick={() => setEditMode(true)}
+                >
+                  Bearbeiten
+                </Button>
+                <Button
+                  variant="outlined"
+                  color="red"
+                  size="small"
+                  onClick={() => deleteList(editListId)}
+                >
+                  Löschen
+                </Button>
+              </div>
+
+              {editMode && (
+                <div className="edit-controls">
+                  <input
+                    type="text"
+                    value={editListName}
+                    onChange={(e) => setEditListName(e.target.value)}
+                  />
+                  <Button
+                    variant="outlined"
+                    color="red"
+                    size="small"
+                    onClick={() => {
+                      updateList();
+                      setEditMode(false);
+                    }}
+                  >
+                    Speichern
+                  </Button>
+                  <Button
+                    variant="outlined"
+                    color="red"
+                    size="small"
+                    onClick={() => setEditMode(false)}
+                  >
+                    Abbrechen
+                  </Button>
+                </div>
+              )}
+              <div className="task-input-group">
                 <input
                   type="text"
-                  value={editTaskName}
-                  onChange={(e) => setEditTaskName(e.target.value)}
+                  placeholder="Neuer Eintrag eingeben"
+                  value={newTaskName}
+                  onChange={(e) => setNewTaskName(e.target.value)}
+                  onKeyDown={(e) =>
+                    e.key === "Enter" &&
+                    postTask(editListId) &&
+                    getTask(editListId)
+                  }
                 />
-                <Button 
-                variant='outlined'
-                color="red"
-                size="small"
-                onClick={() =>{ 
-                updateTask(editTaskId);
-                setEditTaskName("");
-                getTask(editListId);
-                setEditTaskId(null);}}>Speichern</Button>
-                <Button 
-                variant='outlined'
-                color="red"
-                size="small"
-                onClick={() => setEditTaskId(null)}>Abbrechen</Button>
+                <Button
+                  variant="outlined"
+                  color="red"
+                  size="small"
+                  onClick={() => {
+                    postTask(editListId);
+                    getTask(editListId);
+                  }}
+                >
+                  Hinzufügen
+                </Button>
               </div>
-            )}
-          </p>
-        ))}
-      </ul>
 
+              <ul>
+                {tasks.map((task) => (
+                  <p
+                    key={task.taskID}
+                    style={
+                      task.done
+                        ? { textDecoration: "line-through" }
+                        : { textDecoration: "none" }
+                    }
+                  >
+                    {task.taskName}
+                    <input
+                      type="checkbox"
+                      onChange={() =>
+                        toggleEditDoneTask(task.taskID, task.done)
+                      }
+                      checked={task.done}
+                    />
+                    <div className="edit-buttons">
+                      <Button
+                        variant="outlined"
+                        color="red"
+                        size="small"
+                        onClick={() => {
+                          setEditTaskId(task.taskID);
+                          setEditTaskName(task.taskName);
+                        }}
+                      >
+                        Bearbeiten
+                      </Button>
+                      <Button
+                        variant="outlined"
+                        color="red"
+                        size="small"
+                        onClick={() => handleDeleteTask(task.taskID)}
+                      >
+                        Löschen
+                      </Button>
+                    </div>
 
-
-        </>
+                    {editTaskId === task.taskID && (
+                      <div className="edit-controls">
+                        <input
+                          type="text"
+                          value={editTaskName}
+                          onChange={(e) => setEditTaskName(e.target.value)}
+                        />
+                        <Button
+                          variant="outlined"
+                          color="red"
+                          size="small"
+                          onClick={() => {
+                            updateTask(editTaskId);
+                            setEditTaskName("");
+                            getTask(editListId);
+                            setEditTaskId(null);
+                          }}
+                        >
+                          Speichern
+                        </Button>
+                        <Button
+                          variant="outlined"
+                          color="red"
+                          size="small"
+                          onClick={() => setEditTaskId(null)}
+                        >
+                          Abbrechen
+                        </Button>
+                      </div>
+                    )}
+                  </p>
+                ))}
+              </ul>
+            </>
+          )}
+        </div>
       )}
     </div>
-  )}
-</div>
   );
 }
 

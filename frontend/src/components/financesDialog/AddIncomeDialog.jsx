@@ -55,7 +55,7 @@ function AddIncomeDialog({
     } else if (month === 0) {
       date = new Date(year === "All" ? YearToday : year, 1);
     } else {
-      date = new Date(year === "All" ? YearToday : year, 1);
+      date = new Date(year === "All" ? YearToday : year, month);
     }
 
     const formatted = date.toISOString().split("T")[0];
