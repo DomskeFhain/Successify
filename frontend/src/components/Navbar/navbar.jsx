@@ -15,7 +15,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../AuthContex/AuthContex';
 import logo from '../../assets/logo-v2.png';
 
-const pages = [{ name: "Scheduler", link: "/scheduler" }, { name: "Finances", link: "/finances" }, { name: "Shopping-List", link: "/shoppinglist" }, { name: "To-Do", link: "/todo" }];
+const pages = [{ name: "Scheduler", link: "/scheduler" }, { name: "Finances", link: "/finances" }, { name: "Shopping-List", link: "/shoppinglist" }, { name: "To-Do", link: "/todo" }, { name: "Pomodoro", link: "/pomodoro" }];
 
 
 function Navbar() {

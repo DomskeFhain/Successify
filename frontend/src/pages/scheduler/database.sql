@@ -12,7 +12,6 @@
 --       createdBy: "Kristina Mayer"
 --     },
 
-
 CREATE TABLE scheduler (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   label VARCHAR(255) NOT NULL,
