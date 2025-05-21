@@ -86,7 +86,7 @@
     align-items: center;
     padding: 1rem;
     margin-bottom: 0.5rem;
-    background-color: #a39d9d;
+    background-color: #d8cbcb;
     border-radius: 4px;
     transition: background-color 0.3s;
 }
@@ -112,7 +112,7 @@
 
 .shopping-item.completed .item-name {
     text-decoration: line-through;
-    color: #888;
+    color: #c9c1c1;
 }
 
 .item-total {

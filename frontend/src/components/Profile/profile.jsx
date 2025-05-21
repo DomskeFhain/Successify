@@ -7,7 +7,10 @@ import Button from '@mui/material/Button';
 import './profile.css';
 import { useNavigate } from 'react-router-dom';
 import Box from '@mui/material/Box';
-
+import InputAdornment from '@mui/material/InputAdornment';
+import IconButton from '@mui/material/IconButton';
+import Visibility from '@mui/icons-material/Visibility';
+import VisibilityOff from '@mui/icons-material/VisibilityOff';
 function Profile() {
     const { token, logout } = useAuth();
     const handleError = useApiErrorHandler();
@@ -19,6 +22,9 @@ function Profile() {
     const navigate = useNavigate();
     const [confirmDeleteVisible, setConfirmDeleteVisible] = useState(false);
     const [newUsername, setNewUsername] = useState('');
+    const [showNewPassword, setShowNewPassword] = useState(false);
+    const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+    const [showCurrentPassword, setShowCurrentPassword] = useState(false);
 
     const handleDeleteClick = async () => {
         try {
@@ -95,6 +101,22 @@ function Profile() {
             }
         }
     };
+    const toggleShowCurrentPassword = () => {
+        setShowCurrentPassword(!showCurrentPassword);
+    };
+
+    const toggleShowNewPassword = () => {
+        setShowNewPassword(!showNewPassword);
+    };
+
+    const toggleShowConfirmPassword = () => {
+        setShowConfirmPassword(!showConfirmPassword);
+    };
+
+    const handleMouseDownPassword = (event) => {
+        event.preventDefault();
+
+    };
 
     return (
         <div className="profile-container">
@@ -115,28 +137,70 @@ function Profile() {
                     <h3>Change Password</h3>
                     <TextField
                         required
-                        type="password"
+                        type={showCurrentPassword ? "text" : "password"}
                         label="enter your current password"
                         value={currentPassword}
                         onChange={(event) => setCurrentPassword(event.target.value)}
                         fullWidth
                         margin="normal"
+                        InputProps={{
+                            endAdornment: (
+                                <InputAdornment position="end">
+                                    <IconButton
+                                        aria-label="toggle current password visibility"
+                                        onClick={toggleShowCurrentPassword}
+                                        onMouseDown={handleMouseDownPassword}
+                                        edge="end"
+                                    >
+                                        {showCurrentPassword ? <VisibilityOff /> : <Visibility />}
+                                    </IconButton>
+                                </InputAdornment>
+                            ),
+                        }}
                     />
                     <TextField
-                        type="password"
+                        type={showNewPassword ? "text" : "password"}
                         label="enter your new password"
                         value={newPassword}
                         onChange={(event) => setNewPassword(event.target.value)}
                         fullWidth
                         margin="normal"
+                        InputProps={{
+                            endAdornment: (
+                                <InputAdornment position="end">
+                                    <IconButton
+                                        aria-label="toggle new password visibility"
+                                        onClick={toggleShowNewPassword}
+                                        onMouseDown={handleMouseDownPassword}
+                                        edge="end"
+                                    >
+                                        {showNewPassword ? <VisibilityOff /> : <Visibility />}
+                                    </IconButton>
+                                </InputAdornment>
+                            ),
+                        }}
                     />
                     <TextField
-                        type="password"
+                        type={showConfirmPassword ? "text" : "password"}
                         label="verify your new password"
                         value={confirmPassword}
                         onChange={(event) => setConfirmPassword(event.target.value)}
                         fullWidth
                         margin="normal"
+                        InputProps={{
+                            endAdornment: (
+                                <InputAdornment position="end">
+                                    <IconButton
+                                        aria-label="toggle confirm password visibility"
+                                        onClick={toggleShowConfirmPassword}
+                                        onMouseDown={handleMouseDownPassword}
+                                        edge="end"
+                                    >
+                                        {showConfirmPassword ? <VisibilityOff /> : <Visibility />}
+                                    </IconButton>
+                                </InputAdornment>
+                            ),
+                        }}
                     />
                     <Box sx={{ display: 'flex', justifyContent: 'center', gap: 2, mt: 2 }}>
                         <Button sx={{ backgroundColor: "#8B0000", ":hover": { backgroundColor: "#b84545" } }} variant="contained" color="primary" type="submit">
@@ -165,7 +229,6 @@ function Profile() {
                             </div>
                         </div>
                     )}
-
                 </form>
                 {message && <p className={message.includes('successfully') ? 'success-message' : 'error-message'}>{message}</p>}
             </div>

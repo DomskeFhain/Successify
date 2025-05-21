@@ -1,4 +1,5 @@
 import React from 'react'
+import { Link } from 'react-router-dom'
 import "./home.css"
 
 function Home() {
@@ -16,10 +17,21 @@ function Home() {
           Mit Successify haben Sie alle wichtigen Tools an einem Ort:
         </p>
         <ul className="features-list">
-          <li>📅 Terminkalender: Organisieren Sie Ihren Alltag effizient</li>
-          <li>🛒 Shopping-App: Verwalten Sie Ihre Einkäufe übersichtlich</li>
-          <li>✅ To-Do-Liste: Behalten Sie den Überblick über Ihre Aufgaben</li>
-          <li>💰 Finanzplaner: Setzen Sie Ihre finanziellen Ziele um</li>
+          <Link to="/sceduler" className="feature-link">
+            <li>📅 Terminkalender: Organisieren Sie Ihren Alltag effizient</li>
+          </Link>
+          <Link to="/shoppinglist" className="feature-link">
+            <li>🛒 Shopping-App: Verwalten Sie Ihre Einkäufe übersichtlich</li>
+          </Link>
+          <Link to="/todo" className="feature-link">
+            <li>✅ To-Do-Liste: Behalten Sie den Überblick über Ihre Aufgaben</li>
+          </Link>
+          <Link to="/finances" className="feature-link">
+            <li>💰 Finanzplaner: Setzen Sie Ihre finanziellen Ziele um und behalten diese im Überblick</li>
+          </Link>
+          <Link to="/pomodoro" className="feature-link">
+            <li>⏱️ Pomodoro-Timer: Steigern Sie Ihre Produktivität mit der Pomodoro-Technik</li>
+          </Link>
         </ul>
         <p className="motivation">
           Starten Sie jetzt Ihre Reise zu mehr Produktivität und Erfolg.

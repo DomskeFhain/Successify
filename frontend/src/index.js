@@ -8,7 +8,7 @@ import ShoppingList from "./components/Shoppinglist/shoppinglist";
 import Register from "./pages/register/register";
 import Login from "./pages/login/Login";
 import Todo from "./pages/To-Do/todo";
-import Sceduler from "./pages/sceduler/sceduler";
+import Scheduler from "./pages/scheduler/scheduler";
 import { AuthProvider } from "./components/AuthContex/AuthContex";
 import Finances from "./pages/Finances/Finances";
 import Timer from "./pages/Pomodoro/Timer";
@@ -27,7 +27,7 @@ root.render(
           <Route path="/login" element={<Login />} />
           <Route path="/todo" element={<Todo />} />
           <Route path="/finances" element={<Finances />} />
-          <Route path="/sceduler" element={<Sceduler />} />
+          <Route path="/scheduler" element={<Scheduler />} />
           <Route path="/shoppinglist" element={<ShoppingList />} />
           <Route path="/pomodoro" element={<Timer />} />
           <Route path="*" element={<div>404 Not Found</div>} />
