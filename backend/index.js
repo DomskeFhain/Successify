@@ -23,9 +23,9 @@ app.use(financesRoutes);
 const financesIncomeRoutes = require("./routes/financesIncome");
 app.use(financesIncomeRoutes);
 
-// Sceduler
-const scedulerRoutes = require("./routes/sceduler");
-app.use(scedulerRoutes);
+// scheduler
+const schedulerRoutes = require("./routes/scheduler");
+app.use(schedulerRoutes);
 
 // Shopping-List
 const shoppinglistRoutes = require("./routes/shoppinglist");
