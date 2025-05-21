@@ -82,12 +82,12 @@ export default function Countdown() {
 
 
   return (
-    <Box textAlign="center" mt={4}>
+    <Box textAlign="center" mt={3}>
       <Typography variant="h5" gutterBottom>
         Pomodoro Timer
       </Typography>
 
-      <Box mb={2}>
+      <Box>
         <Typography>Focus Duration: {focusDuration} min</Typography>
         <Slider
           color="red"
@@ -107,7 +107,7 @@ export default function Countdown() {
         />
       </Box>
 
-      <Box mb={2}>
+      <Box>
         <Typography>Break Duration: {breakDuration} min</Typography>
         <Slider
           color="red"
@@ -127,7 +127,7 @@ export default function Countdown() {
         />
       </Box>
 
-      <Box mb={2}>
+      <Box mb={1}>
         <Typography>Intervals: {totalCycles}</Typography>
         <Slider
           color="red"
@@ -142,8 +142,8 @@ export default function Countdown() {
         />
       </Box>
 
-      <Box position="relative" display="inline-flex" mt={4}>
-        <CircularProgress variant="determinate" value={progress} size={200} />
+      <Box position="relative" display="inline-flex">
+        <CircularProgress variant="determinate" value={progress} size={150} />
         <Box
           top={0}
           left={0}
@@ -169,7 +169,7 @@ export default function Countdown() {
         </Box>
       </Box>
 
-      <Box mt={4} mb={6} display="flex" justifyContent="center" gap={2} >
+      <Box mb={1} display="flex" justifyContent="center" gap={2} >
         <Button
           variant="outlined"
           color={isRunning ? "red" : "red"}

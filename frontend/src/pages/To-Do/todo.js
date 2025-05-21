@@ -187,7 +187,7 @@ const handleDeleteTask = async (taskID) => {
 </select>
       {editListId && (
         <>
-          <div className="edit-buttons">
+          <div className="list-edit-buttons">
             <Button 
             variant='outlined'
               color="red"
@@ -249,7 +249,7 @@ const handleDeleteTask = async (taskID) => {
           <p key={task.taskID} style={task.done ? {textDecoration: "line-through"} : {textDecoration: "none"}}>
             {task.taskName}
             <input type="checkbox" onChange={() => toggleEditDoneTask(task.taskID, task.done)} checked={task.done}/>
-            <div className="edit-buttons">
+            <div className="task-edit-buttons">
             <Button 
             variant='outlined'
             color="red"

@@ -22,7 +22,7 @@
     padding: 0.5rem;
     font-size: 1rem;
     width: 100%;
-    max-width: 400px;
+    max-width: 385px;
     margin-bottom: 0.5rem;
     border-radius: 6px;
     border: 1px solid #ccc;
@@ -32,7 +32,6 @@
 .dropdown-container {
     margin: 1rem auto;
     padding: 1rem;
-
     border-radius: 8px;
     display: flex;
     flex-direction: column;
@@ -49,6 +48,7 @@
     max-width: 400px;
     margin-bottom: 1rem;
     background-color: white;
+    margin-left: -28px;
 
 }
 
@@ -59,10 +59,6 @@
     border-radius: 8px;
     width: 100%;
     max-width: 600px;
-}
-
-.tasksContainer p:hover {
-    background-color: #f5f5f5;
 }
 
 .tasksContainer input[type="text"] {
@@ -88,20 +84,27 @@
   padding: 0.5rem;
   font-size: 1rem;
   width: 100%;
-  max-width: 400px;
   border-radius: 6px;
   border: 1px solid #ccc;
+  width: 383px;
+  margin-left: -27px;
 }
 
 p {
     font-size: 20px;
-    
+    margin-left: -30px;
 }
 
-.edit-buttons button,
+.list-edit-buttons button,
 .edit-controls button,
 .tasksContainer button {
     margin: 0 0.5rem;
     margin-bottom: 0.5rem;
+
 }
 
+.task-edit-buttons Button {
+    margin: 0 0.5rem;
+    margin-bottom: 0.5rem;
+
+}
