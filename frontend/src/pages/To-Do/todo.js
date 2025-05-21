@@ -41,7 +41,7 @@ function Todo() {
 
   const postList = async () => {
     if (newListName === "") {
-      alert("Listname darf nicht leer sein"); 
+      alert("Please enter a list name"); 
       return;}
     try {
       await axiosAuth.post("/todolist", { listName: newListName });
@@ -93,7 +93,7 @@ const deleteList = async (listID) => {
 
   const postTask = async (listID) => {
     if (newTaskName === "") {
-      alert("Taskname darf nicht leer sein");
+      alert("Please enter a task name");
       return;
     }
     try {
@@ -161,7 +161,7 @@ const handleDeleteTask = async (taskID) => {
   <div className="new-list">
     <input
       type="text"
-      placeholder="Neue Liste eingeben"
+      placeholder="Enter List Name"
       value={newListName}
       onChange={(e) => setNewListName(e.target.value)}
       onKeyDown={(e) => e.key === "Enter" && postList()}
@@ -170,7 +170,7 @@ const handleDeleteTask = async (taskID) => {
     variant='outlined'
     color="red"
     size="small"
-    onClick={postList}>Hinzufügen</Button>
+    onClick={postList}>Add</Button>
   </div>
 
   {lists.length > 0 && (
@@ -185,7 +185,7 @@ const handleDeleteTask = async (taskID) => {
   }}
   value={editListId || ""}
 >
-  <option value="" disabled>Liste auswählen</option>
+  <option value="" disabled>Select List</option>
   {lists.map((list) => (
     <option key={list.listID} value={list.listID}>
       {list.listName}
@@ -199,12 +199,12 @@ const handleDeleteTask = async (taskID) => {
             variant='outlined'
               color="red"
               size="small"
-              onClick={() => setEditMode(true)}>Bearbeiten</Button>
+              onClick={() => setEditMode(true)}>Edit</Button>
             <Button 
             variant='outlined'
             color='red'
             size='small'
-            onClick={() => deleteList(editListId)}>Löschen</Button>
+            onClick={() => deleteList(editListId)}>Delete</Button>
           </div>
         
 
@@ -224,19 +224,19 @@ const handleDeleteTask = async (taskID) => {
                   setEditMode(false);
                 }}
               >
-                Speichern
+                Save
               </Button>
               <Button 
               variant='outlined'
               color='red'
               size='small'
-              onClick={() => setEditMode(false)}>Abbrechen</Button>
+              onClick={() => setEditMode(false)}>Cancel</Button>
             </div>
           )}
       <div className="task-input-group">
           <input
           type="text"
-          placeholder="Neuer Eintrag eingeben"
+          placeholder="Enter new Task"
           value={newTaskName}
           onChange={(e) => setNewTaskName(e.target.value)}
           onKeyDown={(e) => e.key === "Enter" && postTask(editListId) && getTask(editListId)}
@@ -247,7 +247,7 @@ const handleDeleteTask = async (taskID) => {
             size='small'
             onClick={() => {postTask(editListId); getTask(editListId)}}
           >
-          Hinzufügen
+          Add
           </Button>
       </div>
       
@@ -263,12 +263,12 @@ const handleDeleteTask = async (taskID) => {
             size="small"
             onClick={() => {
             setEditTaskId(task.taskID);
-            setEditTaskName(task.taskName);}}>Bearbeiten</Button>
+            setEditTaskName(task.taskName);}}>Edit</Button>
             <Button
             variant='outlined' 
             color="red"
             size="small"
-            onClick={() => handleDeleteTask(task.taskID)}>Löschen</Button>
+            onClick={() => handleDeleteTask(task.taskID)}>Delete</Button>
             </div>
 
             {editTaskId === task.taskID && (
@@ -286,12 +286,12 @@ const handleDeleteTask = async (taskID) => {
                 updateTask(editTaskId);
                 setEditTaskName("");
                 getTask(editListId);
-                setEditTaskId(null);}}>Speichern</Button>
+                setEditTaskId(null);}}>Save</Button>
                 <Button 
                 variant='outlined'
                 color="red"
                 size="small"
-                onClick={() => setEditTaskId(null)}>Abbrechen</Button>
+                onClick={() => setEditTaskId(null)}>Cancel</Button>
               </div>
             )}
           </p>
