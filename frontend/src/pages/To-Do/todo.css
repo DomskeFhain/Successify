@@ -115,7 +115,8 @@ p {
 .task-edit-buttons Button {
     margin: 0 0.5rem;
     margin-bottom: 0.5rem;
-
+    margin-right: 15px;
+    margin-left: 0px;
 }
 
 .edit-controls input {

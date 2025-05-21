@@ -40,6 +40,9 @@ function Todo() {
   };
 
   const postList = async () => {
+    if (newListName === "") {
+      alert("Listname darf nicht leer sein"); 
+      return;}
     try {
       await axiosAuth.post("/todolist", { listName: newListName });
       setNewListName("");
@@ -89,6 +92,10 @@ const deleteList = async (listID) => {
   };
 
   const postTask = async (listID) => {
+    if (newTaskName === "") {
+      alert("Taskname darf nicht leer sein");
+      return;
+    }
     try {
       await axiosAuth.post(`/tasks/${listID}`, { taskName: newTaskName });
       setNewTaskName("");
