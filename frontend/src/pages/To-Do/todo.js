@@ -246,9 +246,9 @@ const handleDeleteTask = async (taskID) => {
       
       <ul>
         {tasks.map((task) => (
-          <p key={task.taskID} style={task.done ? {textDecoration: "line-through"} : {textDecoration: "none"}}>
+          <p className='task' key={task.taskID} style={task.done ? {textDecoration: "line-through"} : {textDecoration: "none"}}>
             {task.taskName}
-            <input type="checkbox" onChange={() => toggleEditDoneTask(task.taskID, task.done)} checked={task.done}/>
+            <input className='task-checkbox' type="checkbox" onChange={() => toggleEditDoneTask(task.taskID, task.done)} checked={task.done}/>
             <div className="task-edit-buttons">
             <Button 
             variant='outlined'

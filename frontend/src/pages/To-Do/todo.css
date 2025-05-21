@@ -8,6 +8,7 @@
     text-align: center;
     color: #8B0000;
     max-width: 800px;
+    box-shadow: #8B0000 0 2px 4px;
 }
 
 .new-list {
@@ -55,7 +56,6 @@
 .tasksContainer {
     margin: 1rem auto;
     padding: 1rem;
-    background-color: #d9d9d9;
     border-radius: 8px;
     width: 100%;
     max-width: 600px;
@@ -63,7 +63,6 @@
 
 .tasksContainer input[type="text"] {
     padding: 0.5rem;
-    width: 100%;
     max-width: 400px;
     font-size: 1rem;
     border-radius: 6px;
@@ -90,17 +89,27 @@
   margin-left: -27px;
 }
 
+.task-input-group button{
+    margin-right: 27px;
+}
+
 p {
     font-size: 20px;
     margin-left: -30px;
 }
 
 .list-edit-buttons button,
-.edit-controls button,
 .tasksContainer button {
     margin: 0 0.5rem;
     margin-bottom: 0.5rem;
+    margin-right: 20px;
+    margin-left: -5px;
 
+}
+
+.edit-controls button {
+    margin: 0 0.5rem;
+    margin-bottom: 0.5rem;
 }
 
 .task-edit-buttons Button {
@@ -108,3 +117,17 @@ p {
     margin-bottom: 0.5rem;
 
 }
+
+.edit-controls input {
+    padding: 0.5rem;
+    font-size: 12px;
+    border: 1px solid #ccc;
+    margin-left: -27px;
+
+}
+
+.task {
+    margin-bottom: 1rem;
+    margin-right: 20px;
+}
+

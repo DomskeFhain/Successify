@@ -8,16 +8,23 @@
   justify-content: center;
   align-items: center;
   border-radius: 8px;
-  font-size: calc(10px + 2vmin);
+  font-size: 12px;
   color: #8B0000;
   flex-direction: column;
+  box-shadow: #8B0000 0 2px 4px;
+  width: 100%;
+  max-width: 800px;
+  margin: 2rem auto;
+  padding: 2rem
 }
 
 .pomodoro {
   font-size: 6em;
+  
 }
 
 .message {
+
   font-size: 0.5em;
   min-height: 1.3em;
   margin-bottom: 0.5em;

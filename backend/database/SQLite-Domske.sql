@@ -24,7 +24,7 @@ CREATE TABLE todoList (
 CREATE TABLE IF NOT EXISTS tasksList (
     taskID INTEGER PRIMARY KEY AUTOINCREMENT,
     taskName TEXT NOT NULL,
-    done INTEGER DEFAULT 0, -- 0 = nicht erledigt, 1 = erledigt
+    done INTEGER DEFAULT 0,
     listID INTEGER,
     FOREIGN KEY (listID) REFERENCES todoList(listID) ON DELETE CASCADE
 );
