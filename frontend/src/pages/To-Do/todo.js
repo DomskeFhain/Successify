@@ -1,12 +1,15 @@
-import React, { useState, useEffect } from 'react';
-import { useAuth } from '../../components/AuthContex/AuthContex';
-import axios from 'axios';
-import './todo.css';
+import React, { useState, useEffect } from "react";
+import { useAuth } from "../../components/AuthContex/AuthContex";
+import axios from "axios";
+import "./todo.css";
 import { useApiErrorHandler } from "../../components/HandleApiError/HandleApiError";
-import Button from '@mui/material/Button';
+import Button from "@mui/material/Button";
+import { useNavigate, useLocation } from "react-router-dom";
 
 function Todo() {
   const handleError = useApiErrorHandler();
+  const navigate = useNavigate();
+  const location = useLocation();
   const { token } = useAuth();
   const [lists, setLists] = useState([]);
   const [newListName, setNewListName] = useState("");
@@ -17,7 +20,6 @@ function Todo() {
   const [newTaskName, setNewTaskName] = useState("");
   const [editTaskId, setEditTaskId] = useState(null);
   const [editTaskName, setEditTaskName] = useState("");
-  
 
   const axiosAuth = axios.create({
     baseURL: "http://localhost:9000",
@@ -26,9 +28,9 @@ function Todo() {
     },
   });
 
-//functions
+  //functions
 
-// list routes x functions
+  // list routes x functions
 
   const getList = async () => {
     try {
@@ -52,35 +54,39 @@ function Todo() {
     }
   };
 
-const updateList = async () => {
-  try {
-    await axiosAuth.put(`/todolist/${editListId}`, { listName: editListName });
-    setLists(prevLists =>
-      prevLists.map(list =>
-        list.listID === editListId ? { ...list, listName: editListName } : list
-      )
-    );
-    setEditListName("");
-    setEditMode(false);
-  } catch (error) {
-    handleError(error);
-  }
-};
+  const updateList = async () => {
+    try {
+      await axiosAuth.put(`/todolist/${editListId}`, {
+        listName: editListName,
+      });
+      setLists((prevLists) =>
+        prevLists.map((list) =>
+          list.listID === editListId
+            ? { ...list, listName: editListName }
+            : list
+        )
+      );
+      setEditListName("");
+      setEditMode(false);
+    } catch (error) {
+      handleError(error);
+    }
+  };
 
-const deleteList = async (listID) => {
-  try {
-    await axiosAuth.delete(`/todolist/${listID}`);
-    setEditListId(null);
-    setEditListName("");
-    setTasks([]);
-    setEditMode(false);
-    getList();
-  } catch (error) {
-    handleError(error);
-  }
-};
+  const deleteList = async (listID) => {
+    try {
+      await axiosAuth.delete(`/todolist/${listID}`);
+      setEditListId(null);
+      setEditListName("");
+      setTasks([]);
+      setEditMode(false);
+      getList();
+    } catch (error) {
+      handleError(error);
+    }
+  };
 
-// Task Routes x Functions
+  // Task Routes x Functions
 
   const getTask = async (listID) => {
     try {
@@ -114,47 +120,54 @@ const deleteList = async (listID) => {
     }
   };
 
-const updateTask = async (taskID) => {
-  try {
-    await axiosAuth.put(`/tasks/${taskID}`, { taskName: editTaskName });
-    setTasks(prevTasks =>
-      prevTasks.map(task =>
-        task.taskID === taskID ? { ...task, taskName: editTaskName } : task
-      )
-    );
+  const updateTask = async (taskID) => {
+    try {
+      await axiosAuth.put(`/tasks/${taskID}`, { taskName: editTaskName });
+      setTasks((prevTasks) =>
+        prevTasks.map((task) =>
+          task.taskID === taskID ? { ...task, taskName: editTaskName } : task
+        )
+      );
 
-    setEditTaskName("");
-    setEditTaskId(null);
-  } catch (error) {
-    handleError(error);
-  }
-};
+      setEditTaskName("");
+      setEditTaskId(null);
+    } catch (error) {
+      handleError(error);
+    }
+  };
 
-const toggleEditDoneTask = async (taskID, doneStatus) => {
-  try {
-    const newStatus = doneStatus === 0 ? 1 : 0;
-    await axiosAuth.put(`/tasks/${taskID}`, { taskDone: newStatus });
+  const toggleEditDoneTask = async (taskID, doneStatus) => {
+    try {
+      const newStatus = doneStatus === 0 ? 1 : 0;
+      await axiosAuth.put(`/tasks/${taskID}`, { taskDone: newStatus });
 
-    setTasks(prevTasks =>
-      prevTasks.map(task =>
-        task.taskID === taskID ? { ...task, done: newStatus } : task
-      )
-    );
-  } catch (error) {
-    handleError(error);
-  }
-};
+      setTasks((prevTasks) =>
+        prevTasks.map((task) =>
+          task.taskID === taskID ? { ...task, done: newStatus } : task
+        )
+      );
+    } catch (error) {
+      handleError(error);
+    }
+  };
 
-const handleDeleteTask = async (taskID) => {
-  await deleteTask(taskID);
-  getTask(editListId);
-};
+  const handleDeleteTask = async (taskID) => {
+    await deleteTask(taskID);
+    getTask(editListId);
+  };
 
-// render
+  // render
 
   useEffect(() => {
     getList();
   }, []);
+
+  if (!token) {
+    const currentLocation = location.pathname;
+
+    navigate("/login", { state: { from: currentLocation } });
+    return;
+  }
 
   return (
 <div className="todo">
