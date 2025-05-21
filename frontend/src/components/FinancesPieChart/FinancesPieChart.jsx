@@ -9,7 +9,7 @@ const FinancesPieChart = ({ finances, months }) => {
     Transportation: "#4BC0C0",
     Leisure: "#9966FF",
     Health: "#FF9F40",
-    Clothing: "#66FF66",
+    Clothing: "#8B0000",
     Household: "#FF6666",
     Communication: "#66B2FF",
     Education: "#CC99FF",
