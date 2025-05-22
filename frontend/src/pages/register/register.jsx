@@ -4,13 +4,20 @@ import Button from "@mui/material/Button";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import "./register.css";
+import InputAdornment from '@mui/material/InputAdornment';
+import IconButton from '@mui/material/IconButton';
+import Visibility from '@mui/icons-material/Visibility';
+import VisibilityOff from '@mui/icons-material/VisibilityOff';
 
 function Register() {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [repeatPassword, setRepeatPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+  const [showRepeatPassword, setShowRepeatPassword] = useState(false);
   const [message, setMessage] = useState(null);
   const navigate = useNavigate();
+
 
   async function handleRegister(event) {
     event.preventDefault();
@@ -37,7 +44,12 @@ function Register() {
       }
     }
   }
-
+  const toggleShowPassword = () => {
+    setShowPassword(!showPassword);
+  };
+  const toggleShowRepeatPassword = () => {
+    setShowRepeatPassword(!showRepeatPassword);
+  };
   return (
     <div className="center-wrapperRegister">
       <div className="reg_formRegister">
@@ -64,21 +76,49 @@ function Register() {
             label="Password"
             variant="outlined"
             fullWidth
-            type="password"
+            type={showPassword ? "text" : "password"}
             value={password}
             margin="normal"
+            InputProps={{
+              endAdornment: (
+                <InputAdornment position="end">
+                  <IconButton
+                    aria-label="toggle password visibility"
+                    onClick={toggleShowPassword}
+                    onMouseDown={(event) => event.preventDefault()}
+                    edge="end"
+                  >
+                    {showPassword ? <VisibilityOff /> : <Visibility />}
+                  </IconButton>
+                </InputAdornment>
+              ),
+            }}
           />
           <TextField
             required
             onChange={(event) => {
               setRepeatPassword(event.target.value);
             }}
-            label="repeat Password"
+            label="repeat password"
             variant="outlined"
             fullWidth
-            type="password"
+            type={showRepeatPassword ? "text" : "password"}
             value={repeatPassword}
             margin="normal"
+            InputProps={{
+              endAdornment: (
+                <InputAdornment position="end">
+                  <IconButton
+                    aria-label="toggle Repeat password visibility"
+                    onClick={toggleShowRepeatPassword}
+                    onMouseDown={(event) => event.preventDefault()}
+                    edge="end"
+                  >
+                    {showRepeatPassword ? <VisibilityOff /> : <Visibility />}
+                  </IconButton>
+                </InputAdornment>
+              ),
+            }}
           />
           <Button sx={{
             backgroundColor: "#8B0000",
