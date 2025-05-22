@@ -11,7 +11,7 @@ const ShoppingList = () => {
   const [quantity, setQuantity] = useState("");
   const [price, setPrice] = useState("");
   const [date, setDate] = useState(new Date().toISOString().split("T")[0]);
-  const [filterDate, setFilterDate] = useState("");
+  const [filterDate, setFilterDate] = useState(new Date().toISOString().split("T")[0]);
   const [error, setError] = useState("");
   const { token } = useAuth();
   const handleError = useApiErrorHandler();
@@ -159,7 +159,7 @@ const ShoppingList = () => {
   };
 
   const calculateTotal = () => {
-    return items.reduce((total, item) => total + item.price * item.quantity, 0);
+    return filteredItems.reduce((total, item) => total + item.price * item.quantity, 0);
   };
 
   const filteredItems = filterDate
