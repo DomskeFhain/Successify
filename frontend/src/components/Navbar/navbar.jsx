@@ -16,7 +16,7 @@ import { useAuth } from "../AuthContex/AuthContex";
 import logo from "../../assets/logo-v2.png";
 import settingsImage from "../../assets/Settings.png";
 
-const pages = [{ name: "Scheduler", link: "/scheduler" }, { name: "Finances", link: "/finances" }, { name: "Shopping-List", link: "/shoppinglist" }, { name: "To-Do", link: "/todo" }, { name: "Pomodoro-Timer", link: "/pomodoro" }];
+const pages = [{ name: "Scheduler", link: "/scheduler" }, { name: "Finances", link: "/finances" }, { name: "Shopping-List", link: "/shoppinglist" }, { name: "To-Do-Manager", link: "/todo" }, { name: "Pomodoro-Timer", link: "/pomodoro" }];
 
 
 function Navbar() {
