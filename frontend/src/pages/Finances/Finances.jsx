@@ -566,7 +566,7 @@ function Finances() {
           )}
           {availableExpanseCategorys.length > 0 && (
             <FormControl sx={{ minWidth: 160 }}>
-              <InputLabel>Filter Expanses</InputLabel>
+              <InputLabel>Filter Expenses</InputLabel>
               <Select
                 label="Filter Expanses"
                 value={filterCategory}
@@ -621,7 +621,7 @@ function Finances() {
       <div id="content">
         {finances || income ? (
           <>
-            <h1 className="topic fade-up">Expanses</h1>
+            <h1 className="topic fade-up">Expenses</h1>
             <div className="left fade-left">
               {loadingExpanses ? (
                 <Box
