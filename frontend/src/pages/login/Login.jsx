@@ -5,6 +5,10 @@ import axios from "axios";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "../../components/AuthContex/AuthContex";
 import "./Login.css";
+import InputAdornment from '@mui/material/InputAdornment';
+import IconButton from '@mui/material/IconButton';
+import Visibility from '@mui/icons-material/Visibility';
+import VisibilityOff from '@mui/icons-material/VisibilityOff';
 
 function Login() {
   const { login } = useAuth();
@@ -13,7 +17,7 @@ function Login() {
   const [message, setMessage] = useState(null);
   const navigate = useNavigate();
   const location = useLocation();
-
+  const [showPassword, setShowPassword] = useState(false);
   const lastSite = location.state?.from || "/";
 
   async function handleRegister(event) {
@@ -37,6 +41,9 @@ function Login() {
       }
     }
   }
+  const toggleShowPassword = () => {
+    setShowPassword(!showPassword);
+  };
 
   return (
     <div className="center-wrapperLogin">
@@ -65,9 +72,23 @@ function Login() {
             label="Password"
             variant="outlined"
             fullWidth
-            type="password"
+            type={showPassword ? "text" : "password"}
             value={password}
             margin="normal"
+            InputProps={{
+              endAdornment: (
+                <InputAdornment position="end">
+                  <IconButton
+                    aria-label="toggle password visibility"
+                    onClick={toggleShowPassword}
+                    onMouseDown={(event) => event.preventDefault()}
+                    edge="end"
+                  >
+                    {showPassword ? <VisibilityOff /> : <Visibility />}
+                  </IconButton>
+                </InputAdornment>
+              ),
+            }}
           />
           <Button sx={{
             backgroundColor: "#8B0000",

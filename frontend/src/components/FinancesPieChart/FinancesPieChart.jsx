@@ -70,7 +70,7 @@ const FinancesPieChart = ({ finances, months }) => {
                 ? percent >= 10
                   ? `${percent.toFixed(1)}%`
                   : ""
-                : percent > 0 && `${percent.toFixed(1)}%`;
+                : percent > 0 && percent >= 5 && `${percent.toFixed(1)}%`;
             },
             highlightScope: { fade: "global", highlight: "item" },
             faded: { innerRadius: 30, additionalRadius: -30, color: "gray" },

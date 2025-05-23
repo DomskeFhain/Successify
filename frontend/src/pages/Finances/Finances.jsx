@@ -649,9 +649,10 @@ function Finances() {
                 <Box
                   sx={{
                     display: "flex",
-                    justifySelf: "center",
+                    justifyContent: "center",
                     alignItems: "center",
-                    height: "4rem",
+                    height: "100%",
+                    width: "100%",
                   }}
                 >
                   <CircularProgress sx={{ color: successifyBase }} />

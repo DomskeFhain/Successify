@@ -22,6 +22,34 @@
     }
 }
 
+@keyframes pulse {
+    0% {
+        box-shadow: 0 4px 20px #8B0000;
+    }
+
+    50% {
+        box-shadow: 0 4px 30px #ff4d4d;
+    }
+
+    100% {
+        box-shadow: 0 4px 20px #8B0000;
+    }
+}
+
+@keyframes gradientBG {
+    0% {
+        background-position: 0% 50%;
+    }
+
+    50% {
+        background-position: 100% 50%;
+    }
+
+    100% {
+        background-position: 0% 50%;
+    }
+}
+
 .home-container {
     max-width: 1200px;
     margin: 0 auto;
@@ -33,9 +61,14 @@
     border: 8px solid #8B0000;
     border-radius: 12px;
     box-shadow: 0 4px 20px #8B0000;
-    animation: fadeIn 1s ease-out;
+    animation: fadeIn 1s ease-out, pulse 3s infinite;
     max-width: 500px;
     width: 100%;
+    transition: transform 0.3s ease;
+}
+
+.home-container img:hover {
+    transform: scale(1.02);
 }
 
 .hero-text {
@@ -50,6 +83,12 @@
     font-size: 2.5rem;
     margin-bottom: 1.5rem;
     animation: fadeIn 1s ease-out 0.3s both;
+    background: linear-gradient(45deg, #2c3e50, #8B0000);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    background-size: 200% 200%;
+    animation: fadeIn 1s ease-out 0.3s both, gradientBG 5s ease infinite;
 }
 
 .description {
@@ -75,11 +114,26 @@
     padding: 1.2rem;
     margin: 0;
     border-radius: 8px;
-    background-color: #fff;
+    background: linear-gradient(45deg, #fff, #fff);
     border: 2px solid #8B0000;
-    transition: all 0.2s ease-in-out;
+    transition: all 0.3s ease-in-out;
     color: #8B0000;
     animation: fadeIn 0.8s ease-out both;
+    position: relative;
+    overflow: hidden;
+}
+
+.feature-link li::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(45deg, #8B0000, #ff4d4d);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    z-index: -1;
 }
 
 .feature-link:nth-child(1) li {
@@ -103,9 +157,13 @@
 }
 
 .feature-link:hover li {
-    background-color: #8B0000;
     color: white;
-    transform: translateX(10px);
+    transform: translateX(10px) scale(1.02);
+    border-color: transparent;
+}
+
+.feature-link:hover li::before {
+    opacity: 1;
 }
 
 .motivation {
@@ -114,12 +172,17 @@
     font-style: italic;
     margin-top: 2rem;
     padding: 1.5rem;
-    background-color: #f8f9fa;
+    background: linear-gradient(45deg, #f8f9fa, #fff5f5);
     border-radius: 8px;
     animation: fadeIn 1s ease-out 1.7s both;
     max-width: 800px;
     margin-left: auto;
     margin-right: auto;
+    transition: transform 0.3s ease;
+}
+
+.motivation:hover {
+    transform: translateY(-5px);
 }
 
 .feature-link {

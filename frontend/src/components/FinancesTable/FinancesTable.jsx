@@ -37,7 +37,7 @@ export default function FinancesTable({
   const [editData, setEditData] = useState(null);
   const [open, setOpen] = useState(false);
   const handleError = useApiErrorHandler();
-  const [pageSize, setPageSize] = useState(5);
+  const [pageSize, setPageSize] = useState(rows.length >= 10 ? 10 : 5);
 
   const successifyBase = "#8B0000";
   const successifyMain = alpha(successifyBase, 0.7);

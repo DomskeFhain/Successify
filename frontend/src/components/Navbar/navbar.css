@@ -1,13 +1,16 @@
 .navbar-logo-desktop {
   display: none;
 }
+
 .navbar-logo-mobile {
   display: flex;
 }
+
 @media (min-width: 900px) {
   .navbar-logo-desktop {
     display: flex;
   }
+
   .navbar-logo-mobile {
     display: none;
   }
